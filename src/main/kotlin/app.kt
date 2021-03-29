@@ -8,7 +8,6 @@ fun main() {
     val system = PluginSystem.create {
         this["safedoor01"] = ESP8266Safedoor()
         this["safedoor02"] = ESP8266Safedoor()
-        remove("safedoor01")
     }
 
     val client = MqttClient.builder().useMqttVersion5().identifier("mqtt_backend").serverHost("localhost").build()

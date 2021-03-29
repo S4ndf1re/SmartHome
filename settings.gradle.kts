@@ -1,2 +1,2 @@
-rootProject.name = "SafeDoor"
+rootProject.name = "SmartHome"
 
