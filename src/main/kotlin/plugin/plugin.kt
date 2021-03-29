@@ -12,7 +12,7 @@ interface IPlugin {
 class PluginSystem {
     companion object Factory {
         fun create(f: PluginSystem.() -> Unit): PluginSystem {
-            print("Hello")
+            print("Test2")
             val system = PluginSystem()
             system.f()
             return system
