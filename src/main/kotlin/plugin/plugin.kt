@@ -5,14 +5,14 @@ import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
 interface IPlugin {
 
     fun init(handler: Mqtt5Client)
-    fun close()
+    fun close(handler: Mqtt5Client)
 
 }
-
 
 class PluginSystem {
     companion object Factory {
         fun create(f: PluginSystem.() -> Unit): PluginSystem {
+            print("Hello")
             val system = PluginSystem()
             system.f()
             return system
@@ -40,9 +40,10 @@ class PluginSystem {
         }
     }
 
-    fun stop() {
+    fun stop(client: Mqtt5Client) {
         for ((k, v) in this.pluginList) {
-            v.close()
+            v.close(client)
         }
     }
+
 }
