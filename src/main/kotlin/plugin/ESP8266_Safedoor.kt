@@ -19,4 +19,16 @@ class ESP8266Safedoor : IPlugin {
     private fun handle(data: Mqtt5Publish) {
         println("$data")
     }
+
+    override fun getHttpHandles(): Map<String, () -> String> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getMqttPublishTopics(): ArrayList<String> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getMqttSubscriptionsTopics(): ArrayList<String> {
+        TODO("Not yet implemented")
+    }
 }

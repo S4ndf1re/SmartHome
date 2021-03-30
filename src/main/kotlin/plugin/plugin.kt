@@ -1,16 +1,21 @@
 package plugin
 
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
-import java.io.File
-import java.net.URLClassLoader
+import util.ExtensionLoader
 
+typealias Path = String
+typealias Topic = String
 
 /**
  * IPlugin is the interface, which plugins must implement, in order to be able to function as one.
  */
+
 interface IPlugin {
 
     fun init(handler: Mqtt5Client)
+    fun getMqttSubscriptionsTopics(): ArrayList<Topic>
+    fun getMqttPublishTopics(): ArrayList<Topic>
+    fun getHttpHandles(): Map<Path, () -> String>
     fun close(handler: Mqtt5Client)
 
 }
@@ -35,29 +40,14 @@ class PluginSystem {
          */
         fun loadFromDir(dir: String): PluginSystem {
             val system = PluginSystem()
-            val pluginsDir = File(dir)
-            val fileList = pluginsDir.listFiles() ?: return system
-            for (f in fileList) {
-                try {
-                    val classLoader =
-                        URLClassLoader.newInstance(arrayOf(f.toURI().toURL()), this::class.java.classLoader)
-                    val clazz = Class.forName("plugin", true, classLoader)
-                    val extendedClass: Class<out IPlugin> = clazz.asSubclass(IPlugin::class.java)
-
-                    val constr = extendedClass.getConstructor()
-                    system[f.name] = constr.newInstance()
-
-                } catch (e: Exception) {
-
-                }
-            }
-
+            val loader = ExtensionLoader<IPlugin>()
+            system.pluginList = loader.loadFromDir(dir, "Plugin", IPlugin::class.java)
 
             return system
         }
     }
 
-    private val pluginList: MutableMap<String, IPlugin> = mutableMapOf()
+    private var pluginList: MutableMap<String, IPlugin> = mutableMapOf()
 
     /**
      * set adds or sets a value in the plugin system
