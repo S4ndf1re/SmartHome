@@ -1,0 +1,29 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id "org.jetbrains.dokka"
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    implementation 'com.hivemq:hivemq-mqtt-client:1.2.1'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.4.30'
+    dokkaHtmlPlugin "org.jetbrains.dokka:kotlin-as-java-plugin:1.4.30"
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "13"
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "13"
+    }
+}
