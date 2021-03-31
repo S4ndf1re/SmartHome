@@ -3,6 +3,8 @@ package util
 import java.io.File
 import java.net.URLClassLoader
 
+typealias Path = String
+
 /**
  * Extension Loader is a helper class to retrieve Plugins from a directory.
  */
@@ -16,7 +18,7 @@ class ExtensionLoader<T> {
      * @param parent The parent class to inherit from
      * @return A mutable list of type T objects
      */
-    fun loadFromDir(dir: String, classname: String, parent: Class<T>): MutableMap<String, T> {
+    fun loadFromDir(dir: Path, classname: String, parent: Class<T>): MutableMap<String, T> {
         val map = mutableMapOf<String, T>()
         val pluginsDir = File(dir)
         val fileList = pluginsDir.listFiles() ?: return map
@@ -27,8 +29,8 @@ class ExtensionLoader<T> {
                 val clazz = Class.forName(classname, true, classLoader)
                 val extendedClass: Class<out T> = clazz.asSubclass(parent)
 
-                val constr = extendedClass.getConstructor()
-                map[f.name] = constr.newInstance()
+                val constructor = extendedClass.getConstructor()
+                map[f.name] = constructor.newInstance()
 
             } catch (e: Exception) {
 

@@ -20,7 +20,11 @@ class ESP8266Safedoor : IPlugin {
         println("$data")
     }
 
-    override fun getHttpHandles(): Map<String, () -> String> {
+    override fun getMqttGuiSubscriptionTopics(): ArrayList<Topic> {
+        TODO("Not yet implemented")
+    }
+
+    override fun getMqttGuiPublishTopics(): ArrayList<Topic> {
         TODO("Not yet implemented")
     }
 

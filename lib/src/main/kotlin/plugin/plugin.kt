@@ -2,8 +2,8 @@ package plugin
 
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
 import util.ExtensionLoader
+import util.Path
 
-typealias Path = String
 typealias Topic = String
 
 /**
@@ -15,7 +15,8 @@ interface IPlugin {
     fun init(handler: Mqtt5Client)
     fun getMqttSubscriptionsTopics(): ArrayList<Topic>
     fun getMqttPublishTopics(): ArrayList<Topic>
-    fun getHttpHandles(): Map<Path, () -> String>
+    fun getMqttGuiSubscriptionTopics(): ArrayList<Topic>
+    fun getMqttGuiPublishTopics(): ArrayList<Topic>
     fun close(handler: Mqtt5Client)
 
 }
@@ -38,7 +39,7 @@ class PluginSystem {
          * @param dir The directory to load plugins from.
          * @return The complete and loaded PluginSystem
          */
-        fun loadFromDir(dir: String): PluginSystem {
+        fun loadFromDir(dir: Path): PluginSystem {
             val system = PluginSystem()
             val loader = ExtensionLoader<IPlugin>()
             system.pluginList = loader.loadFromDir(dir, "Plugin", IPlugin::class.java)

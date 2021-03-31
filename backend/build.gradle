@@ -2,6 +2,7 @@ plugins {
     id 'org.jetbrains.kotlin.jvm'
     id 'application'
     id "org.jetbrains.dokka"
+    id 'org.jetbrains.kotlin.plugin.serialization'
 }
 
 
@@ -18,6 +19,9 @@ dependencies {
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
     dokkaHtmlPlugin "org.jetbrains.dokka:kotlin-as-java-plugin:1.4.30"
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0'
+    implementation "net.devrieze:xmlutil-jvm:0.80.1"
+    implementation "net.devrieze:xmlutil-serialization-jvm:0.80.1"
 }
 
 application {

@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<Config>
+    <identifier>mqtt_backend</identifier>
+    <hostname>localhost</hostname>
+    <username>mqtt_backend</username>
+    <password>test</password>
+</Config>
