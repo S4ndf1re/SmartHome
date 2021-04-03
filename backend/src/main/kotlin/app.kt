@@ -2,16 +2,13 @@ import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
-import plugin.ESP8266Safedoor
 import plugin.PluginSystem
 
 
 fun main() {
 
     val config = Config.loadConfig()
-    val system = PluginSystem.create {
-        this["safedoor01"] = ESP8266Safedoor()
-    }
+    val system = PluginSystem()
 
     try {
         val client = MqttClient.builder()
@@ -39,7 +36,7 @@ fun main() {
         client.toBlocking().disconnect()
 
     } catch (e: Exception) {
-       
+
     }
 
     config.save()

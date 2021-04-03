@@ -32,14 +32,15 @@ data class Config(
                 val text = file.readText()
                 configFromXml(text)
             } catch (e: Exception) {
-                defaultConfig()
+                default()
             }
         }
+
 
         /**
          * defaultConfig simply generates a filled config with default values
          */
-        private fun defaultConfig(): Config {
+        private fun default(): Config {
             return Config("mqtt_backend", "localhost", "", "")
         }
 
