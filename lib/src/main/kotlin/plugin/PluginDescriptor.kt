@@ -6,9 +6,6 @@ import kotlinx.serialization.encodeToString
 import nl.adaptivity.xmlutil.XmlDeclMode
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlElement
-import util.Author
-import util.Path
-import util.Version
 import java.io.File
 
 /**

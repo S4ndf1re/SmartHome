@@ -2,8 +2,6 @@ package plugin
 
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
 import mu.KotlinLogging
-import util.ExtensionLoader
-import util.Path
 import java.io.File
 
 /**

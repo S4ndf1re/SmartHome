@@ -1,4 +1,4 @@
-package util
+package plugin
 
 typealias Topic = String
 typealias Path = String

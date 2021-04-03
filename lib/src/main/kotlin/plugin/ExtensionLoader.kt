@@ -1,4 +1,4 @@
-package util
+package plugin
 
 import java.io.File
 import java.net.URLClassLoader
@@ -19,25 +19,21 @@ class ExtensionLoader<T> {
      */
     fun loadFromDir(dir: Path, classnames: ArrayList<String>, parent: Class<T>): MutableMap<String, T> {
         val map = mutableMapOf<String, T>()
-        val pluginsDir = File(dir)
-        val fileList = pluginsDir.listFiles() ?: return map
-        for (f in fileList) {
-            try {
-                val classLoader =
-                    URLClassLoader.newInstance(arrayOf(f.toURI().toURL()), this::class.java.classLoader)
-                for (classname in classnames) {
-                    val clazz = Class.forName(classname, true, classLoader)
-                    val extendedClass: Class<out T> = clazz.asSubclass(parent)
+        val pluginsFile = File(dir)
+        try {
+            val classLoader =
+                URLClassLoader.newInstance(arrayOf(pluginsFile.toURI().toURL()), this::class.java.classLoader)
+            for (classname in classnames) {
+                val clazz = Class.forName(classname, true, classLoader)
+                val extendedClass: Class<out T> = clazz.asSubclass(parent)
 
-                    val constructor = extendedClass.getConstructor()
-                    map[f.name] = constructor.newInstance()
-                }
-
-            } catch (e: Exception) {
-
+                val constructor = extendedClass.getConstructor()
+                map[pluginsFile.name] = constructor.newInstance()
             }
-        }
 
+        } catch (e: Exception) {
+
+        }
 
         return map
     }

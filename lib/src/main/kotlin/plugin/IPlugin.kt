@@ -1,7 +1,6 @@
 package plugin
 
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
-import util.Topic
 
 /**
  * IPlugin is the interface, which plugins must implement, in order to be able to function as one.
