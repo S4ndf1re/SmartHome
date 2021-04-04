@@ -44,16 +44,16 @@ data class PluginDescriptor(
          * @param path The path from where to find the plugin.xml
          * @return A new, possibly default PluginDescriptor
          */
-        fun load(path: Path): PluginDescriptor {
+        fun load(path: Path): PluginDescriptor? {
             return try {
                 val file = File(path)
                 val xml = XML {
                     indentString = "    "
                     xmlDeclMode = XmlDeclMode.Minimal
                 }
-                xml.decodeFromString(file.readText())
+                xml.decodeFromString<PluginDescriptor>(file.readText())
             } catch (e: Exception) {
-                default()
+                null
             }
         }
     }

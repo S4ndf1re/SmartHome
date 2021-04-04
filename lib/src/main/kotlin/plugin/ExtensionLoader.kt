@@ -20,20 +20,20 @@ class ExtensionLoader<T> {
     fun loadFromDir(dir: Path, classnames: ArrayList<String>, parent: Class<T>): MutableMap<String, T> {
         val map = mutableMapOf<String, T>()
         val pluginsFile = File(dir)
-        try {
-            val classLoader =
-                URLClassLoader.newInstance(arrayOf(pluginsFile.toURI().toURL()), this::class.java.classLoader)
-            for (classname in classnames) {
+        val classLoader =
+            URLClassLoader.newInstance(arrayOf(pluginsFile.toURI().toURL()), this::class.java.classLoader)
+        for (classname in classnames) {
+            try {
                 val clazz = Class.forName(classname, true, classLoader)
                 val extendedClass: Class<out T> = clazz.asSubclass(parent)
 
                 val constructor = extendedClass.getConstructor()
-                map[pluginsFile.name] = constructor.newInstance()
+                map[pluginsFile.name + File.separator + classname] = constructor.newInstance()
+            } catch (e: Exception) {
+                // Just continue, because the class does not exist
             }
-
-        } catch (e: Exception) {
-
         }
+
 
         return map
     }

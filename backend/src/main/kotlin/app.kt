@@ -8,7 +8,8 @@ import plugin.PluginSystem
 fun main() {
 
     val config = Config.loadConfig()
-    val system = PluginSystem()
+    val system = PluginSystem.loadFromDir("plugins", plugin.implementations.PluginCreator())
+
 
     try {
         val client = MqttClient.builder()
@@ -22,13 +23,15 @@ fun main() {
             .serverHost(config.hostname)
             .build()
         client.toBlocking().connect()
-        system.start(client)
-        runBlocking {
-            delay(5000)
-        }
 
         client.toBlocking().publishWith().topic("backend/status/active").payload("true".toByteArray()).retain(true)
             .send()
+
+        system.start(client)
+
+        runBlocking {
+            delay(5000)
+        }
 
         system.stop(client)
         client.toBlocking().publishWith().topic("backend/status/active").payload("false".toByteArray()).retain(true)

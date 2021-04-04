@@ -1,13 +1,12 @@
 package plugin
 
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
-import mu.KotlinLogging
 import java.io.File
 
 /**
  * PluginSystem defines the plugin system loader and usage.
  */
-class PluginSystem {
+class PluginSystem<T> {
     companion object Factory {
 
         /**
@@ -17,20 +16,24 @@ class PluginSystem {
          * @param path The directory to load plugins from.
          * @return The complete and loaded PluginSystem
          */
-        fun loadFromDir(path: Path): PluginSystem {
-            val system = PluginSystem()
+        inline fun <reified T> loadFromDir(path: Path, creator: PluginCreator<T>): PluginSystem<T> {
+            val system = PluginSystem<T>()
             val pluginDir = File(path)
             val dirs = pluginDir.listFiles() ?: return system
             for (dir in dirs) {
-                val descriptor = PluginDescriptor.load(dir.path + "plugin.xml")
-                val loader = ExtensionLoader<IPlugin>()
+
+                if (!dir.isDirectory) {
+                    return system
+                }
+                val descriptor = PluginDescriptor.load(dir.path + File.separator + "plugin.xml") ?: continue
+                val loader = ExtensionLoader<T>()
                 val classMap = loader.loadFromDir(
-                    dir = dir.path + descriptor.jarName,
+                    dir = dir.path + File.separator + descriptor.jarName,
                     classnames = descriptor.pluginClass,
-                    parent = IPlugin::class.java
+                    parent = T::class.java
                 )
 
-                system.pluginList[dir.name] = Plugin(
+                system.pluginList[dir.name] = creator.create(
                     descriptor = descriptor,
                     name = dir.name,
                     pluginClassMap = classMap
@@ -40,8 +43,7 @@ class PluginSystem {
         }
     }
 
-    private var pluginList: MutableMap<String, Plugin> = mutableMapOf()
-    private val logger = KotlinLogging.logger {}
+    var pluginList: MutableMap<String, Plugin<T>> = mutableMapOf()
 
     /**
      * set adds or sets a value in the plugin system
@@ -49,7 +51,7 @@ class PluginSystem {
      * @param plugin The plugin that will get loaded
      * @return True if successful
      */
-    operator fun set(key: String, plugin: Plugin): Boolean {
+    operator fun set(key: String, plugin: Plugin<T>): Boolean {
         this.pluginList[key] = plugin
         return this.pluginList[key] == plugin
     }
@@ -59,7 +61,7 @@ class PluginSystem {
      * @param key The name of the plugin
      * @return The Plugin, if found. Else null
      */
-    operator fun get(key: String): Plugin? {
+    operator fun get(key: String): Plugin<T>? {
         return this.pluginList[key]
     }
 
@@ -68,7 +70,7 @@ class PluginSystem {
      * @param key The name of the plugin
      * @return The plugin that got removed. If no plugin was removed, null is returned
      */
-    fun remove(key: String): Plugin? {
+    fun remove(key: String): Plugin<T>? {
         return this.pluginList.remove(key)
     }
 
@@ -77,17 +79,9 @@ class PluginSystem {
      * @param client Defines the global MQTT client
      */
     fun start(client: Mqtt5Client) {
-        logger.info { "Starting all Plugins" }
         for ((_, v) in this.pluginList) {
-            logger.info { "\tStarting Plugin ${v.name}" }
-            for ((name, iPlug) in v.pluginClassMap) {
-                logger.info { "\t\tStarting $name" }
-                iPlug.init(client)
-                logger.info { "\t\tDone" }
-            }
-            logger.info { "\tDone" }
+            v.start(client)
         }
-        logger.info { "Done" }
     }
 
     /**
@@ -95,17 +89,9 @@ class PluginSystem {
      * @param client Defines the global MQTT client
      */
     fun stop(client: Mqtt5Client) {
-        logger.info { "Starting graceful shutdown" }
         for ((_, v) in this.pluginList) {
-            logger.info { "\tClosing Plugin ${v.name}" }
-            for ((name, iPlug) in v.pluginClassMap) {
-                logger.info { "\t\tClosing $name." }
-                iPlug.close(client)
-                logger.info { "\t\tDone" }
-            }
-            logger.info { "\tDone" }
+            v.stop(client)
         }
-        logger.info { "Done" }
     }
 
 }
