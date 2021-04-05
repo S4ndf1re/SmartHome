@@ -14,7 +14,19 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/backend" />
             <option value="$PROJECT_DIR$/lib" />
+            <option value="$PROJECT_DIR$/lib_gui" />
             <option value="$PROJECT_DIR$/plugin_test" />
+          </set>
+        </option>
+      </GradleProjectSettings>
+      <GradleProjectSettings>
+        <option name="distributionType" value="DEFAULT_WRAPPED" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/../lib_gui2" />
+        <option name="gradleHome" value="$PROJECT_DIR$/../../../../Gradle" />
+        <option name="gradleJvm" value="15" />
+        <option name="modules">
+          <set>
+            <option value="$PROJECT_DIR$/../lib_gui2" />
           </set>
         </option>
       </GradleProjectSettings>

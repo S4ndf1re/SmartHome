@@ -1,0 +1,4 @@
+package gui
+
+interface Child {
+}
