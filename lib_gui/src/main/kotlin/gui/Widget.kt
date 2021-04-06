@@ -45,4 +45,28 @@ interface Widget {
         this.list.add(slider)
     }
 
+    fun data(f: Data.() -> Unit) {
+        val data = Data()
+        data.f()
+        this.list.add(data)
+    }
+
+    fun checkbox(f: Checkbox.() -> Unit) {
+        val check = Checkbox()
+        check.f()
+        this.list.add(check)
+    }
+
+    fun image(f: Image.() -> Unit) {
+        val img = Image()
+        img.f()
+        this.list.add(img)
+    }
+
+    fun colorfield(f: ColorField.() -> Unit) {
+        val col = ColorField()
+        col.f()
+        this.list.add(col)
+    }
+
 }
