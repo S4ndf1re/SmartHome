@@ -3,5 +3,5 @@ package gui
 import kotlinx.serialization.Serializable
 
 @Serializable
-class VSplitter : Child {
+class VSplitter(override var name: String) : Child {
 }

@@ -37,5 +37,4 @@
     <orderEntry type="library" scope="RUNTIME" name="Gradle: io.netty:netty-resolver:4.1.48.Final" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: javax.inject:javax.inject:1" level="project" />
   </component>
-  <component name="TestModuleProperties" production-module="SmartHome.lib_gui.main" />
 </module>

@@ -1,5 +1,8 @@
 package gui
 
-class Data : Child, MqttData {
+import kotlinx.serialization.Serializable
+
+@Serializable
+class Data(override var name: String) : Child, MqttData {
     override var topic: String = ""
 }

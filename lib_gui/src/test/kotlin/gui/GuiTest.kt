@@ -9,61 +9,85 @@ class GuiTest {
     @Test
     fun test_01() {
         val gui = Gui.create {
-            hbox {
-                vbox {
-                    button {
+            hbox("hbox1") {
+                vbox("vbox1") {
+                    button("button1") {
                         text = "Button1"
                         onClick = "button1/click"
                     }
-                    label {
+                    label("label2") {
                         text = "Label1"
                     }
                 }
-                vsplitter {
+                vsplitter("vsplitter1") {
                 }
-                vbox {
-                    label {
+                vbox("vbox2") {
+                    label("label2") {
                     }
-                    slider {
+                    slider("slider1") {
+                    }
+                }
+                form("form1") {
+                    button("form_button1") {
+
                     }
                 }
             }
         }
         val format = gui.getJsonDefault()
         val str = format.encodeToString(gui)
-        //println(str)
+        println(str)
         assertEquals(str, """{
     "child": {
         "type": "gui.Container",
+        "name": "root",
         "list": [
             {
                 "type": "gui.HBox",
+                "name": "hbox1",
                 "list": [
                     {
                         "type": "gui.VBox",
+                        "name": "vbox1",
                         "list": [
                             {
                                 "type": "gui.Button",
+                                "name": "button1",
                                 "onClick": "button1/click",
                                 "text": "Button1"
                             },
                             {
                                 "type": "gui.Label",
+                                "name": "label2",
                                 "text": "Label1"
                             }
                         ]
                     },
                     {
-                        "type": "gui.VSplitter"
+                        "type": "gui.VSplitter",
+                        "name": "vsplitter1"
                     },
                     {
                         "type": "gui.VBox",
+                        "name": "vbox2",
                         "list": [
                             {
-                                "type": "gui.Label"
+                                "type": "gui.Label",
+                                "name": "label2"
                             },
                             {
-                                "type": "gui.Slider"
+                                "type": "gui.Slider",
+                                "name": "slider1"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "gui.Form",
+                        "name": "form1",
+                        "list": [
+                            {
+                                "type": "gui.Button",
+                                "name": "form_button1"
                             }
                         ]
                     }

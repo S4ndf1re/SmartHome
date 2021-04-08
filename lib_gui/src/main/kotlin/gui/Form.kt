@@ -3,6 +3,7 @@ package gui
 import kotlinx.serialization.Serializable
 
 @Serializable
-class Container(override var name: String) : Child, Widget {
+class Form(override var name: String) : Child, Widget, MqttData {
     override var list: MutableList<Child> = mutableListOf()
+    override var topic: String = ""
 }
