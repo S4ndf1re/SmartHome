@@ -20,6 +20,7 @@ dependencies {
     implementation "net.devrieze:xmlutil-jvm:0.80.1"
     implementation "net.devrieze:xmlutil-serialization-jvm:0.80.1"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0"
+    implementation project(":lib_gui")
 }
 
 compileKotlin {

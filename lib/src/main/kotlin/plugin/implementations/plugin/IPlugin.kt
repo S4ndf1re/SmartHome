@@ -1,6 +1,8 @@
-package plugin
+package plugin.implementations.plugin
 
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
+import gui.Container
+import plugin.Topic
 
 /**
  * IPlugin is the interface, which plugins must implement, in order to be able to function as one.
@@ -27,6 +29,13 @@ interface IPlugin {
      * @return A list of all Mqtt Published Topics
      */
     fun getMqttPublishTopics(): ArrayList<Topic>
+
+    /**
+     * getContainer will return a gui container, that serves as a widget in the later front end
+     * @param path This field will give the destination under which to expect incoming button data any other data from the frontend
+     * @return Container from gui.Container, which servers as a frontend widget
+     */
+    fun getContainer(path: String): Container
 
     /**
      * close will get called at the end of the lifecycle of the PluginManager

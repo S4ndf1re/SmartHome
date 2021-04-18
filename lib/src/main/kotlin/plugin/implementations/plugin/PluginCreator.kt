@@ -1,6 +1,5 @@
-package plugin.implementations
+package plugin.implementations.plugin
 
-import plugin.IPlugin
 import plugin.Plugin
 import plugin.PluginCreator
 import plugin.PluginDescriptor

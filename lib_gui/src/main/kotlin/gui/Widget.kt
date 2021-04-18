@@ -1,5 +1,9 @@
 package gui
 
+/**
+ * A Widget is a child, that can have its own childs.
+ * It is mend as a gui widget like a html div or something similar.
+ */
 interface Widget {
     var list: MutableList<Child>
 
@@ -73,6 +77,12 @@ interface Widget {
         val form = Form(name)
         form.f()
         this.list.add(form)
+    }
+
+    fun container(name: String, f: Container.() -> Unit) {
+        val cont = Container(name)
+        cont.f()
+        this.list.add(cont)
     }
 
 }

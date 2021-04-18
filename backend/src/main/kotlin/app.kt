@@ -3,12 +3,15 @@ import com.hivemq.client.mqtt.datatypes.MqttQos
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import plugin.PluginSystem
+import plugin.implementations.controller.ControllerCreator
+import plugin.implementations.plugin.PluginCreator
 
 
 fun main() {
 
     val config = Config.loadConfig()
-    val system = PluginSystem.loadFromDir("plugins", plugin.implementations.PluginCreator())
+    val system = PluginSystem.loadFromDir("plugins", PluginCreator())
+    val controllers = PluginSystem.loadFromDir("controller", ControllerCreator(system.pluginList.toMap()))
 
 
     try {
@@ -28,6 +31,7 @@ fun main() {
             .send()
 
         system.start(client)
+        controllers.start(client)
 
         runBlocking {
             delay(5000)

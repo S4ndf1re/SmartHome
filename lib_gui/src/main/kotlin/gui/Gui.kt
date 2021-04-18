@@ -7,14 +7,22 @@ import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 
 @Serializable
-class Gui(val child: Widget) {
+class Gui() {
+
+    private val containers = arrayListOf<Container>()
 
     companion object Factory {
-        fun create(f: Container.() -> Unit): Gui {
-            val cont = Container("root")
-            cont.f()
-            return Gui(cont)
+        fun create(f: Gui.() -> Unit): Gui {
+            val gui = Gui()
+            gui.f()
+            return gui
         }
+    }
+
+    fun add(name: String, f: Container.() -> Unit) {
+        val cont = Container(name)
+        cont.f()
+        this.containers.add(cont)
     }
 
     private fun getSerializationsModule(): SerializersModule {
@@ -65,6 +73,7 @@ class Gui(val child: Widget) {
         return Json {
             serializersModule = getSerializationsModule()
             prettyPrint = true
+            encodeDefaults = true
         }
     }
 

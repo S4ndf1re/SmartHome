@@ -2,6 +2,7 @@ package plugin
 
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
 import com.hivemq.client.mqtt.mqtt5.message.publish.Mqtt5Publish
+import plugin.implementations.plugin.IPlugin
 
 class ESP8266Safedoor : IPlugin {
     override fun init(handler: Mqtt5Client): Boolean {

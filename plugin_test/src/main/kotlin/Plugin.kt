@@ -1,6 +1,6 @@
 import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
-import plugin.IPlugin
 import plugin.Topic
+import plugin.implementations.plugin.IPlugin
 import java.nio.charset.StandardCharsets
 
 class Plugin : IPlugin {
