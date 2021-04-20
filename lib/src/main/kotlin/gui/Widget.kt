@@ -49,8 +49,8 @@ interface Widget {
         this.list.add(slider)
     }
 
-    fun data(name: String, f: Data.() -> Unit) {
-        val data = Data(name)
+    fun <T : ToJson> data(name: String, f: Data<T>.() -> Unit) {
+        val data = Data<T>(name)
         data.f()
         this.list.add(data)
     }

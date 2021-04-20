@@ -1,8 +1,5 @@
 package gui
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 class ColorField(override var name: String) : Child {
     var r: Int = 0
     var g: Int = 0
