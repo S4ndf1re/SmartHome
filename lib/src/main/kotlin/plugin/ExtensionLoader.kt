@@ -28,7 +28,7 @@ class ExtensionLoader<T> {
                 val extendedClass: Class<out T> = clazz.asSubclass(parent)
 
                 val constructor = extendedClass.getConstructor()
-                map[pluginsFile.name + File.separator + classname] = constructor.newInstance()
+                map[classname] = constructor.newInstance()
             } catch (e: Exception) {
                 // Just continue, because the class does not exist
             }

@@ -1,6 +1,6 @@
 package plugin.implementations.plugin
 
-import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
+import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import gui.Container
 import plugin.Topic
 
@@ -14,7 +14,7 @@ interface IPlugin {
      * @param handler A handler to a already initialized Mqtt5Client
      * @return True if successful, false otherwise
      */
-    fun init(handler: Mqtt5Client): Boolean
+    fun init(handler: Mqtt3Client): Boolean
 
     /**
      * getMqttSubscriptionsTopics will return a list of all subscribed topics
@@ -42,6 +42,6 @@ interface IPlugin {
      * This function can be safely used to clean up and unsubscribe to topics.
      * @param handler A handler to a already initialized Mqtt5Client
      */
-    fun close(handler: Mqtt5Client)
+    fun close(handler: Mqtt3Client)
 
 }

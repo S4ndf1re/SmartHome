@@ -1,6 +1,6 @@
 package plugin.implementations.plugin
 
-import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
+import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import plugin.Plugin
 import plugin.PluginDescriptor
 
@@ -11,7 +11,7 @@ class PluginImpl(
 ) : Plugin<IPlugin>() {
 
 
-    override fun start(client: Mqtt5Client) {
+    override fun start(client: Mqtt3Client) {
         for ((name, v) in this.pluginClassMap) {
             println("Starting $name")
             v.init(client)
@@ -19,7 +19,7 @@ class PluginImpl(
         }
     }
 
-    override fun stop(client: Mqtt5Client) {
+    override fun stop(client: Mqtt3Client) {
         for ((name, v) in this.pluginClassMap) {
             println("Stopping $name")
             v.close(client)

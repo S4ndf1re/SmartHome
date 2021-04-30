@@ -15,6 +15,8 @@ data class Config(
     @XmlElement(true)
     val hostname: String,
     @XmlElement(true)
+    val port: Int,
+    @XmlElement(true)
     val username: String,
     @XmlElement(true)
     val password: String,
@@ -41,7 +43,7 @@ data class Config(
          * defaultConfig simply generates a filled config with default values
          */
         private fun default(): Config {
-            return Config("mqtt_backend", "localhost", "", "")
+            return Config("mqtt_backend", "localhost", 1883, "", "")
         }
 
         /**

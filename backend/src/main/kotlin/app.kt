@@ -13,17 +13,16 @@ fun main() {
     val system = PluginSystem.loadFromDir("plugins", PluginCreator())
     val controllers = PluginSystem.loadFromDir("controller", ControllerCreator(system.pluginList.toMap()))
 
-
     try {
         val client = MqttClient.builder()
-            .useMqttVersion5()
+            .useMqttVersion3()
             .willPublish().topic("backend/status/active")
             .qos(MqttQos.AT_LEAST_ONCE)
             .payload("false".toByteArray())
             .retain(true).applyWillPublish()
             .identifier(config.identifier)
             .simpleAuth().username(config.username).password(config.password.toByteArray()).applySimpleAuth()
-            .serverHost(config.hostname)
+            .serverHost(config.hostname).serverPort(config.port)
             .build()
         client.toBlocking().connect()
 
@@ -38,12 +37,14 @@ fun main() {
         }
 
         system.stop(client)
+        controllers.stop(client)
         client.toBlocking().publishWith().topic("backend/status/active").payload("false".toByteArray()).retain(true)
             .send()
         client.toBlocking().disconnect()
 
     } catch (e: Exception) {
 
+        e.printStackTrace()
     }
 
     config.save()

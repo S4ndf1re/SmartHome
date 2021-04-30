@@ -7,4 +7,4 @@ pluginManagement {
 }
 
 rootProject.name = "SmartHome"
-include("lib", "lib_gui", "backend", "plugin_test")
+include("lib", "backend", "plugin_test", "default_controller")

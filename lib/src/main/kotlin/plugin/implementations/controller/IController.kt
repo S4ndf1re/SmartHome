@@ -1,6 +1,6 @@
 package plugin.implementations.controller
 
-import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
+import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import plugin.Plugin
 import plugin.implementations.plugin.IPlugin
 
@@ -14,7 +14,7 @@ interface IController {
      * @param handler A handler to a already initialized Mqtt5Client
      * @return True if successful, false otherwise
      */
-    fun init(handler: Mqtt5Client, pluginList: Map<String, Plugin<IPlugin>>): Boolean
+    fun init(handler: Mqtt3Client, pluginList: Map<String, Plugin<IPlugin>>): Boolean
 
 
     /**
@@ -22,6 +22,6 @@ interface IController {
      * This function can be safely used to clean up and unsubscribe to topics.
      * @param handler A handler to a already initialized Mqtt5Client
      */
-    fun close(handler: Mqtt5Client)
+    fun close(handler: Mqtt3Client)
 
 }

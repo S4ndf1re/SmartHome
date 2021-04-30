@@ -1,6 +1,6 @@
 package plugin
 
-import com.hivemq.client.mqtt.mqtt5.Mqtt5Client
+import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import java.io.File
 
 /**
@@ -78,7 +78,7 @@ class PluginSystem<T> {
      * start will initialize all plugins
      * @param client Defines the global MQTT client
      */
-    fun start(client: Mqtt5Client) {
+    fun start(client: Mqtt3Client) {
         for ((_, v) in this.pluginList) {
             v.start(client)
         }
@@ -88,7 +88,7 @@ class PluginSystem<T> {
      * stop will close all plugins
      * @param client Defines the global MQTT client
      */
-    fun stop(client: Mqtt5Client) {
+    fun stop(client: Mqtt3Client) {
         for ((_, v) in this.pluginList) {
             v.stop(client)
         }
