@@ -1,0 +1,44 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id "org.jetbrains.dokka"
+    id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'java-library'
+}
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    implementation 'com.hivemq:hivemq-mqtt-client:1.2.1'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.4.30'
+    dokkaHtmlPlugin "org.jetbrains.dokka:kotlin-as-java-plugin:1.4.30"
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0'
+    implementation "net.devrieze:xmlutil-jvm:0.80.1"
+    implementation project(":lib")
+    implementation "io.ktor:ktor-server-core:1.5.4"
+    implementation "io.ktor:ktor-server-netty:1.5.4"
+    implementation "ch.qos.logback:logback-classic:1.2.3"
+    implementation "net.devrieze:xmlutil-serialization-jvm:0.80.1"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0"
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "13"
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "13"
+    }
+}
+jar {
+    from {
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}

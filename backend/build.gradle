@@ -1,0 +1,50 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'application'
+    id "org.jetbrains.dokka"
+    id 'org.jetbrains.kotlin.plugin.serialization'
+}
+
+
+repositories {
+    mavenCentral()
+    jcenter()
+}
+
+dependencies {
+    implementation 'com.hivemq:hivemq-mqtt-client:1.2.1'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.4.30'
+    implementation project(":lib")
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.4.2-native-mt'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
+    dokkaHtmlPlugin "org.jetbrains.dokka:kotlin-as-java-plugin:1.4.30"
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0'
+    implementation "net.devrieze:xmlutil-jvm:0.80.1"
+    implementation "net.devrieze:xmlutil-serialization-jvm:0.80.1"
+}
+
+application {
+    getMainClass().set 'AppKt'
+}
+
+compileKotlin {
+    kotlinOptions {
+        jvmTarget = "13"
+    }
+}
+
+compileTestKotlin {
+    kotlinOptions {
+        jvmTarget = "13"
+    }
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'AppKt'
+    }
+    //from {
+    //    configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+    //}
+}

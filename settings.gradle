@@ -1,0 +1,10 @@
+pluginManagement {
+    repositories {
+        gradlePluginPortal()
+        jcenter()
+        mavenCentral()
+    }
+}
+
+rootProject.name = "SmartHome"
+include("lib", "backend", "plugin_test", "default_controller")

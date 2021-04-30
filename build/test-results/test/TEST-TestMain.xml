@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="TestMain" tests="1" skipped="0" failures="0" errors="0" timestamp="2021-03-27T16:29:28" hostname="DESKTOP-1OG6496" time="0.023">
-  <properties/>
-  <testcase name="testFalseAdd()" classname="TestMain" time="0.023"/>
-  <system-out><![CDATA[]]></system-out>
-  <system-err><![CDATA[]]></system-err>
-</testsuite>
