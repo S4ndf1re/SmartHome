@@ -1,6 +1,7 @@
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import gui.Gui
 import io.ktor.application.*
+import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
@@ -18,7 +19,13 @@ class Plugin : IController {
     override fun init(handler: Mqtt3Client, pluginList: Map<String, Plugin<IPlugin>>): Boolean {
         this.pluginList = pluginList
 
-        embeddedServer(Netty, port = 8080) {
+        embeddedServer(Netty, port = 1337) {
+            install(CORS) {
+                header(HttpHeaders.AccessControlAllowHeaders)
+                header(HttpHeaders.AccessControlAllowOrigin)
+                anyHost()
+                allowSameOrigin = true
+            }
             routing {
                 pluginList.forEach { (key, value) ->
                     value.pluginClassMap.forEach { (name, plugin) ->
@@ -39,6 +46,7 @@ class Plugin : IController {
                 get("gui") {
                     val js = gui.getJsonDefault()
                     call.respondText(js.encodeToString(gui), status = HttpStatusCode.OK)
+
                 }
             }
         }.start(wait = true)
