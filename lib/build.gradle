@@ -11,15 +11,16 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.hivemq:hivemq-mqtt-client:1.2.1'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.4.30'
+    implementation "com.hivemq:hivemq-mqtt-client:1.2.1"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:1.4.30"
     dokkaHtmlPlugin "org.jetbrains.dokka:kotlin-as-java-plugin:1.4.30"
-    testImplementation 'org.jetbrains.kotlin:kotlin-test'
-    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0'
+    testImplementation "org.jetbrains.kotlin:kotlin-test"
+    testImplementation "org.jetbrains.kotlin:kotlin-test-junit"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0"
     implementation "net.devrieze:xmlutil-jvm:0.80.1"
     implementation "net.devrieze:xmlutil-serialization-jvm:0.80.1"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0"
+    implementation "org.ktorm:ktorm-core:3.4.0"
 }
 
 compileKotlin {

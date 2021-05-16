@@ -58,5 +58,4 @@
     <orderEntry type="library" scope="RUNTIME" name="Gradle: com.google.dagger:dagger:2.27" level="project" />
     <orderEntry type="library" scope="RUNTIME" name="Gradle: javax.inject:javax.inject:1" level="project" />
   </component>
-  <component name="TestModuleProperties" production-module="SmartHome.default_controller.main" />
 </module>
