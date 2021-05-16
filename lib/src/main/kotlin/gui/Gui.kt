@@ -49,6 +49,8 @@ class Gui() {
             }
             polymorphic(Clickable::class) {
                 subclass(Button::class)
+            }
+            polymorphic(OnOffState::class) {
                 subclass(Checkbox::class)
             }
             polymorphic(Textable::class) {
