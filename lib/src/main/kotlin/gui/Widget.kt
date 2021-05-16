@@ -85,4 +85,10 @@ interface Widget {
         this.list.add(cont)
     }
 
+    fun textfield(name: String, f: TextField.() -> Unit) {
+        val txt = TextField(name)
+        txt.f()
+        this.list.add(txt)
+    }
+
 }
