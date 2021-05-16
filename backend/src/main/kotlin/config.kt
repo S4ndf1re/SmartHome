@@ -8,8 +8,9 @@ import java.io.File
 
 const val configPath = "config.xml"
 
+
 @Serializable
-data class Config(
+data class MqttConfig(
     @XmlElement(true)
     val identifier: String,
     @XmlElement(true)
@@ -20,10 +21,25 @@ data class Config(
     val username: String,
     @XmlElement(true)
     val password: String,
-) {
+)
 
+@Serializable
+data class SQLConfig(
+    @XmlElement(true)
+    val hostname: String,
+    @XmlElement(true)
+    val port: Int,
+    @XmlElement(true)
+    val database: String,
+    @XmlElement(true)
+    val username: String,
+    @XmlElement(true)
+    val password: String,
+)
+
+@Serializable
+data class Config(val mqtt: MqttConfig, val sql: SQLConfig) {
     companion object Factory {
-
         /**
          * loadConfig will load either the config defined in [configPath] or the default config
          * @return Configuration file
@@ -43,7 +59,8 @@ data class Config(
          * defaultConfig simply generates a filled config with default values
          */
         private fun default(): Config {
-            return Config("mqtt_backend", "localhost", 1883, "", "")
+            return Config(mqtt = MqttConfig("mqtt_backend", "localhost", 1883, "", ""),
+                sql = SQLConfig("localhost", 3306, "backend", "root", "admin"))
         }
 
         /**

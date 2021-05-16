@@ -20,9 +20,9 @@ fun main() {
             .qos(MqttQos.AT_LEAST_ONCE)
             .payload("false".toByteArray())
             .retain(true).applyWillPublish()
-            .identifier(config.identifier)
-            .simpleAuth().username(config.username).password(config.password.toByteArray()).applySimpleAuth()
-            .serverHost(config.hostname).serverPort(config.port)
+            .identifier(config.mqtt.identifier)
+            .simpleAuth().username(config.mqtt.username).password(config.mqtt.password.toByteArray()).applySimpleAuth()
+            .serverHost(config.mqtt.hostname).serverPort(config.mqtt.port)
             .build()
         client.toBlocking().connect()
 
