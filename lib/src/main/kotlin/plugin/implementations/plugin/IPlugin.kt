@@ -32,10 +32,9 @@ interface IPlugin {
 
     /**
      * getContainer will return a gui container, that serves as a widget in the later front end
-     * @param path This field will give the destination under which to expect incoming button data any other data from the frontend
-     * @return Container from gui.Container, which servers as a frontend widget
+     * @return List of Containers from gui.Container, which servers as a frontend widget
      */
-    fun getContainer(path: String): Container
+    fun getContainers(): List<Container>
 
     /**
      * close will get called at the end of the lifecycle of the PluginManager
