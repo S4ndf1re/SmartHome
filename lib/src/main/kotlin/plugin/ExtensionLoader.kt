@@ -30,6 +30,7 @@ class ExtensionLoader<T> {
                 val constructor = extendedClass.getConstructor()
                 map[classname] = constructor.newInstance()
             } catch (e: Exception) {
+                e.printStackTrace()
                 // Just continue, because the class does not exist
             }
         }
