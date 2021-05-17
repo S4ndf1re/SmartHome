@@ -21,6 +21,8 @@ dependencies {
     implementation "net.devrieze:xmlutil-serialization-jvm:0.80.1"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0"
     implementation "org.ktorm:ktorm-core:3.4.0"
+    implementation 'org.ktorm:ktorm-core:3.4.0'
+    implementation 'org.ktorm:ktorm-support-mysql:3.4.0'
 }
 
 compileKotlin {

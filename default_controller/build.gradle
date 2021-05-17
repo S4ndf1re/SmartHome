@@ -26,6 +26,8 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0"
     implementation 'io.ktor:ktor-serialization:1.5.4'
     implementation 'io.ktor:ktor-auth:1.5.4'
+    implementation 'org.ktorm:ktorm-support-mysql:3.4.0'
+    implementation 'mysql:mysql-connector-java:8.0.24'
 }
 
 compileKotlin {
