@@ -13,16 +13,24 @@ import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
+import org.ktorm.database.Database
+import org.ktorm.dsl.eq
+import org.ktorm.dsl.from
+import org.ktorm.dsl.select
+import org.ktorm.dsl.where
 import plugin.Plugin
 import plugin.implementations.controller.IController
 import plugin.implementations.plugin.IPlugin
+import structures.User
+import java.util.concurrent.TimeUnit
 
 @Serializable
 data class TextInputData(val text: String)
 
 class Plugin : IController {
-    private var pluginList: Map<String, Plugin<IPlugin>> = mapOf();
-    private var gui: gui.Gui = Gui.create { }
+    private var pluginList: Map<String, Plugin<IPlugin>> = mapOf()
+    private var gui: Gui = Gui.create { }
+    private var server: NettyApplicationEngine? = null
 
     private fun configureOnOffState(routing: Route, child: Child, key: String, name: String) {
         if (child is gui.OnOffState) {
@@ -68,10 +76,10 @@ class Plugin : IController {
         }
     }
 
-    override fun init(handler: Mqtt3Client, pluginList: Map<String, Plugin<IPlugin>>): Boolean {
+    override fun init(handler: Mqtt3Client, database: Database, pluginList: Map<String, Plugin<IPlugin>>): Boolean {
         this.pluginList = pluginList
 
-        embeddedServer(Netty, port = 1337) {
+        this.server = embeddedServer(Netty, port = 1337) {
             install(CORS) {
                 header(HttpHeaders.AccessControlAllowHeaders)
                 header(HttpHeaders.AccessControlAllowOrigin)
@@ -87,11 +95,15 @@ class Plugin : IController {
                 basic("login") {
                     realm = "Access to API"
                     validate { credentials ->
-                        if (credentials.name == "jetbrains" && credentials.password == "foobar") {
-                            UserIdPrincipal(credentials.name)
-                        } else {
-                            null
+                        val results = database.from(User).select().where {
+                            User.name eq credentials.name
                         }
+                        for (row in results) {
+                            if (row[User.name].equals(credentials.name) && row[User.password].equals(credentials.password)) {
+                                return@validate row[User.name]?.let { UserIdPrincipal(it) }
+                            }
+                        }
+                        null
                     }
                 }
             }
@@ -118,12 +130,13 @@ class Plugin : IController {
                     }
                 }
             }
-        }.start(wait = true)
+        }.start(wait = false)
 
 
         return true
     }
 
-    override fun close(handler: Mqtt3Client) {
+    override fun close() {
+        this.server?.stop(gracePeriod = 10, timeout = 10, timeUnit = TimeUnit.SECONDS)
     }
 }

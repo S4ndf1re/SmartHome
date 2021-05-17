@@ -1,6 +1,7 @@
 package plugin
 
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
+import org.ktorm.database.Database
 import java.io.File
 
 /**
@@ -77,20 +78,20 @@ class PluginSystem<T> {
     /**
      * start will initialize all plugins
      * @param client Defines the global MQTT client
+     * @param database Defines the database
      */
-    fun start(client: Mqtt3Client) {
+    fun start(client: Mqtt3Client, database: Database) {
         for ((_, v) in this.pluginList) {
-            v.start(client)
+            v.start(client, database)
         }
     }
 
     /**
      * stop will close all plugins
-     * @param client Defines the global MQTT client
      */
-    fun stop(client: Mqtt3Client) {
+    fun stop() {
         for ((_, v) in this.pluginList) {
-            v.stop(client)
+            v.stop()
         }
     }
 

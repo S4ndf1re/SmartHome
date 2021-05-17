@@ -1,6 +1,7 @@
 package plugin.implementations.controller
 
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
+import org.ktorm.database.Database
 import plugin.Plugin
 import plugin.PluginDescriptor
 import plugin.implementations.plugin.IPlugin
@@ -12,18 +13,18 @@ class ControllerImpl(
     private val plugins: Map<String, Plugin<IPlugin>>,
 ) : Plugin<IController>() {
 
-    override fun start(client: Mqtt3Client) {
+    override fun start(client: Mqtt3Client, database: Database) {
         for ((name, v) in this.pluginClassMap) {
             println("Starting $name")
-            v.init(client, plugins)
+            v.init(client, database, plugins)
             println("Done")
         }
     }
 
-    override fun stop(client: Mqtt3Client) {
+    override fun stop() {
         for ((name, v) in this.pluginClassMap) {
             println("Stopping $name")
-            v.close(client)
+            v.close()
             println("Done")
         }
     }
