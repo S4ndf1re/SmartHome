@@ -9,6 +9,7 @@ import org.ktorm.database.Database
  */
 interface IPlugin {
 
+
     /**
      * init gets called right after the program started
      * @param handler A handler to a already initialized Mqtt5Client

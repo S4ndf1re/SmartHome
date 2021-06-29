@@ -1,0 +1,43 @@
+$dokka.format:html-v1
+$dokka.linkExtension:html
+$dokka.location:plugin////PointingToDeclaration/lib/plugin/index.html
+$dokka.location:plugin/ESP8266Safedoor///PointingToDeclaration/lib/plugin/-e-s-p8266-safedoor/index.html
+$dokka.location:plugin/ESP8266Safedoor/ESP8266Safedoor/#/PointingToDeclaration/lib/plugin/-e-s-p8266-safedoor/-e-s-p8266-safedoor.html
+$dokka.location:plugin/ESP8266Safedoor/close/#com.hivemq.client.mqtt.mqtt5.Mqtt5Client/PointingToDeclaration/lib/plugin/-e-s-p8266-safedoor/close.html
+$dokka.location:plugin/ESP8266Safedoor/getMqttPublishTopics/#/PointingToDeclaration/lib/plugin/-e-s-p8266-safedoor/get-mqtt-publish-topics.html
+$dokka.location:plugin/ESP8266Safedoor/getMqttSubscriptionsTopics/#/PointingToDeclaration/lib/plugin/-e-s-p8266-safedoor/get-mqtt-subscriptions-topics.html
+$dokka.location:plugin/ESP8266Safedoor/init/#com.hivemq.client.mqtt.mqtt5.Mqtt5Client/PointingToDeclaration/lib/plugin/-e-s-p8266-safedoor/init.html
+$dokka.location:plugin/ExtensionLoader///PointingToDeclaration/lib/plugin/-extension-loader/index.html
+$dokka.location:plugin/ExtensionLoader/ExtensionLoader/#/PointingToDeclaration/lib/plugin/-extension-loader/-extension-loader.html
+$dokka.location:plugin/ExtensionLoader/loadFromDir/#kotlin.String#java.util.ArrayList[kotlin.String]#java.lang.Class[TypeParam(bounds=[kotlin.Any?])]/PointingToDeclaration/lib/plugin/-extension-loader/load-from-dir.html
+$dokka.location:plugin/IPlugin///PointingToDeclaration/lib/plugin/-i-plugin/index.html
+$dokka.location:plugin/IPlugin/close/#com.hivemq.client.mqtt.mqtt5.Mqtt5Client/PointingToDeclaration/lib/plugin/-i-plugin/close.html
+$dokka.location:plugin/IPlugin/getMqttPublishTopics/#/PointingToDeclaration/lib/plugin/-i-plugin/get-mqtt-publish-topics.html
+$dokka.location:plugin/IPlugin/getMqttSubscriptionsTopics/#/PointingToDeclaration/lib/plugin/-i-plugin/get-mqtt-subscriptions-topics.html
+$dokka.location:plugin/IPlugin/init/#com.hivemq.client.mqtt.mqtt5.Mqtt5Client/PointingToDeclaration/lib/plugin/-i-plugin/init.html
+$dokka.location:plugin/Plugin///PointingToDeclaration/lib/plugin/-plugin/index.html
+$dokka.location:plugin/Plugin/Plugin/#kotlin.String#plugin.PluginDescriptor#kotlin.collections.Map[kotlin.String,plugin.IPlugin]/PointingToDeclaration/lib/plugin/-plugin/-plugin.html
+$dokka.location:plugin/Plugin/getDescriptor/#/PointingToDeclaration/lib/plugin/-plugin/get-descriptor.html
+$dokka.location:plugin/Plugin/getName/#/PointingToDeclaration/lib/plugin/-plugin/get-name.html
+$dokka.location:plugin/Plugin/getPluginClassMap/#/PointingToDeclaration/lib/plugin/-plugin/get-plugin-class-map.html
+$dokka.location:plugin/PluginDescriptor.Factory///PointingToDeclaration/lib/plugin/-plugin-descriptor/-factory/index.html
+$dokka.location:plugin/PluginDescriptor.Factory/default/#/PointingToDeclaration/lib/plugin/-plugin-descriptor/-factory/default.html
+$dokka.location:plugin/PluginDescriptor.Factory/load/#kotlin.String/PointingToDeclaration/lib/plugin/-plugin-descriptor/-factory/load.html
+$dokka.location:plugin/PluginDescriptor///PointingToDeclaration/lib/plugin/-plugin-descriptor/index.html
+$dokka.location:plugin/PluginDescriptor/PluginDescriptor/#kotlin.String#kotlin.String#kotlin.String#java.util.ArrayList[kotlin.String]/PointingToDeclaration/lib/plugin/-plugin-descriptor/-plugin-descriptor.html
+$dokka.location:plugin/PluginDescriptor/getAuthor/#/PointingToDeclaration/lib/plugin/-plugin-descriptor/get-author.html
+$dokka.location:plugin/PluginDescriptor/getJarName/#/PointingToDeclaration/lib/plugin/-plugin-descriptor/get-jar-name.html
+$dokka.location:plugin/PluginDescriptor/getPluginClass/#/PointingToDeclaration/lib/plugin/-plugin-descriptor/get-plugin-class.html
+$dokka.location:plugin/PluginDescriptor/getVersion/#/PointingToDeclaration/lib/plugin/-plugin-descriptor/get-version.html
+$dokka.location:plugin/PluginDescriptor/save/#kotlin.String/PointingToDeclaration/lib/plugin/-plugin-descriptor/save.html
+$dokka.location:plugin/PluginSystem.Factory///PointingToDeclaration/lib/plugin/-plugin-system/-factory/index.html
+$dokka.location:plugin/PluginSystem.Factory/loadFromDir/#kotlin.String/PointingToDeclaration/lib/plugin/-plugin-system/-factory/load-from-dir.html
+$dokka.location:plugin/PluginSystem///PointingToDeclaration/lib/plugin/-plugin-system/index.html
+$dokka.location:plugin/PluginSystem/PluginSystem/#/PointingToDeclaration/lib/plugin/-plugin-system/-plugin-system.html
+$dokka.location:plugin/PluginSystem/get/#kotlin.String/PointingToDeclaration/lib/plugin/-plugin-system/get.html
+$dokka.location:plugin/PluginSystem/remove/#kotlin.String/PointingToDeclaration/lib/plugin/-plugin-system/remove.html
+$dokka.location:plugin/PluginSystem/set/#kotlin.String#plugin.Plugin/PointingToDeclaration/lib/plugin/-plugin-system/set.html
+$dokka.location:plugin/PluginSystem/start/#com.hivemq.client.mqtt.mqtt5.Mqtt5Client/PointingToDeclaration/lib/plugin/-plugin-system/start.html
+$dokka.location:plugin/PluginSystem/stop/#com.hivemq.client.mqtt.mqtt5.Mqtt5Client/PointingToDeclaration/lib/plugin/-plugin-system/stop.html
+plugin
+

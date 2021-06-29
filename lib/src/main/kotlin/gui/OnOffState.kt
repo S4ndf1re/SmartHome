@@ -5,7 +5,10 @@ interface OnOffState {
     var onOnStateRequest: String
     var onGetStateRequest: String
 
-    var onOnState: () -> Unit
-    var onOffState: () -> Unit
-    var getCurrent: () -> Boolean
+    /**
+     * String as the argument is the user id from the ktor server
+     */
+    var onOnState: (userId: String) -> Unit
+    var onOffState: (userId: String) -> Unit
+    var getCurrent: (userId: String) -> Boolean
 }

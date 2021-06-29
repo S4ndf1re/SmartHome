@@ -15,7 +15,7 @@
             <option value="$PROJECT_DIR$/backend" />
             <option value="$PROJECT_DIR$/default_controller" />
             <option value="$PROJECT_DIR$/lib" />
-            <option value="$PROJECT_DIR$/plugin_test" />
+            <option value="$PROJECT_DIR$/plugin_default" />
           </set>
         </option>
       </GradleProjectSettings>

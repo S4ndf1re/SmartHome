@@ -5,9 +5,10 @@ package gui
  */
 interface Clickable {
     /**
-     * onClick is a callback function that gets called after the controller registeres a button click
+     * onClick is a callback function that gets called after the controller registers a button click
+     * It takes a user id as string argument
      */
-    var onClick: () -> Unit
+    var onClick: (userId: String) -> Unit
 
     var onClickRequest: String
 }
