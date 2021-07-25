@@ -2,9 +2,14 @@
 #include <EEPROM.h>
 #include <MFRC522.h>
 #include <EspMQTTClient.h>
+#include <Base64.h>
 
 #define RST_PIN 2
 #define SS_PIN 15
+
+#define MAX_BYTES 48
+#define DEFAULT_BLOCK 4 // This will start at Sector 0, Block 0
+#define TRAILING_SECTOR 7 // Authentication sector.
 
 #define CHIP_ID "01"
 
@@ -18,6 +23,7 @@ typedef struct {
 
 
 MFRC522 mfrc522(SS_PIN, RST_PIN);
+MFRC522::MIFARE_Key key;
 
 EspMQTTClient *client = NULL;
 String ssid = "";
@@ -34,10 +40,18 @@ void onSaveCallback() {
   shouldSave = true;
 }
 
+// Init default key. This may change during development
+void initRfidKey() {
+  for (byte i = 0; i < 6; i++) {
+    key.keyByte[i] = 0xFF;
+  }
+}
+
 void setup() {
 
   Serial.begin(9600);
 
+  // Try connect to wifi and or mqtt.
   char port[6] = "";
   WiFiManagerParameter mqtt_server("server", "mqtt server", config.server, 40);
   WiFiManagerParameter mqtt_password("password", "mqtt password", config.password, 40);
@@ -57,7 +71,7 @@ void setup() {
   strcpy(config.password, mqtt_password.getValue());
 
 
-
+  // Save mqtt data
   EEPROM.begin(sizeof(config));
   if (shouldSave && result) {
     Serial.println("Should save");
@@ -72,13 +86,6 @@ void setup() {
   psk = WiFi.psk();
   ssid = WiFi.SSID();
   WiFi.disconnect();
-
-  Serial.println(psk.c_str());
-  Serial.println(ssid.c_str());
-  Serial.println(config.server);
-  Serial.println(config.port);
-  Serial.println(config.user);
-  Serial.println(config.password);
 
 
 
@@ -101,35 +108,151 @@ void setup() {
 
   SPI.begin();
   mfrc522.PCD_Init();
+
+  initRfidKey();
 }
+
+bool compareByteArray(byte* a, int sizeA, byte* b, int sizeB) {
+  if (sizeA != sizeB) {
+    return false;
+  }
+  for (int i = 0; i < sizeA; i++) {
+    if (a[i] != b[i]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void safeWrite(byte* data, int size) {
+  if (size > MAX_BYTES) {
+    client->publish("doorlock/" CHIP_ID "/error", "{ \"error\": \"To many bytes. Max size is 48 bytes.\"");
+    return;
+  }
+
+  MFRC522::StatusCode status;
+
+
+  status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, TRAILING_SECTOR, &key, &(mfrc522.uid));
+  if (status != MFRC522::STATUS_OK) {
+    return;
+  }
+
+  byte buffer[16] = {0};
+  int offset = 0;
+  int blockAddr = DEFAULT_BLOCK;
+  for (int i = 0; i < 3; i++, blockAddr++) {
+    int remaining = min(16, size - offset);
+    for (int j = 0; j < remaining; j++) {
+      buffer[j] = data[j + offset];
+    }
+    offset += remaining;
+    if (remaining == 0) {
+      break;
+    }
+
+    bool success = false;
+    for (int tryIdx = 0; tryIdx < 3; tryIdx++) {
+      status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(blockAddr, buffer, 16);
+      byte newBuffer[16];
+      byte bufferSize = 16;
+      status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(blockAddr, newBuffer, &bufferSize);
+      if (compareByteArray(buffer, 16, newBuffer, 16)) {
+        success = true;
+        break;
+      }
+    }
+
+    if (!success) {
+      client->publish("doorlock/" CHIP_ID "/error", "{ \"error\": \"After 3 tries, data could not be written onto chip.\"");
+      break;
+    }
+
+  }
+
+  // Halt PICC
+  mfrc522.PICC_HaltA();
+  // Stop encryption on PCD
+  mfrc522.PCD_StopCrypto1();
+}
+
+void onDoorlockWrite(const String &msg) {
+  // TODO Base64 Decode
+  safeWrite((byte*)msg.c_str(), msg.length());
+}
+
 
 void onConnectionEstablished() {
   client->publish("doorlock/" CHIP_ID "/status", "{ \"active\": true }", true);
+  client->subscribe("doorlock/" CHIP_ID "/write", onDoorlockWrite);
+}
+
+
+void rfidRead(byte* data, int size) {
+  if (size > MAX_BYTES) {
+    client->publish("doorlock/" CHIP_ID "/error", "{ \"error\": \"To many bytes. Max size is 48 bytes.\"");
+    return;
+  }
+
+  MFRC522::StatusCode status;
+
+
+  status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, TRAILING_SECTOR, &key, &(mfrc522.uid));
+  if (status != MFRC522::STATUS_OK) {
+    return;
+  }
+
+  byte buffer[16] = {0};
+  byte bufferSize = 16;
+  int offset = 0;
+  int blockAddr = DEFAULT_BLOCK;
+  for (int i = 0; i < 3; i++, blockAddr++) {
+    int remaining = min(16, size - offset);
+
+    offset += remaining;
+    if (remaining == 0) {
+      break;
+    }
+    status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(blockAddr, buffer, &bufferSize);
+
+    for (int j = 0; j < remaining; j++) {
+      data[j + offset] = buffer[j];
+    }
+  }
+}
+
+void rfidLoop() {
+  
+  if ( ! mfrc522.PICC_IsNewCardPresent())
+    return;
+
+  // Select one of the cards
+  if ( ! mfrc522.PICC_ReadCardSerial())
+    return;
+
+  byte buffer[MAX_BYTES + 1];
+  rfidRead(buffer, MAX_BYTES);
+  buffer[MAX_BYTES] = '\0';
+  // TODO Base64 Encode
+  String data = "{ \"uid\": \"";
+  data += mfrc522.uid;
+  data += "\", \"data\": \"";
+  data += buffer;
+  data += "\" }";
+  Serial.println(data);
+  // client->publish("doorlock/" CHIP_ID "/read", data);
+  
 }
 
 void loop() {
 
   client->loop();
-  
-  // Look for new cards
-  if ( ! mfrc522.PICC_IsNewCardPresent()) {
-    delay(50);
-    return;
-  }
-  // Select one of the cards
-  if ( ! mfrc522.PICC_ReadCardSerial()) {
-    delay(50);
-    return;
-  }
-  // Show some details of the PICC (that is: the tag/card)
-  Serial.print(F("Card UID:"));
-  dump_byte_array(mfrc522.uid.uidByte, mfrc522.uid.size);
-  Serial.println();
+  rfidLoop();
 
 }
 
 // Helper routine to dump a byte array as hex values to Serial
-void dump_byte_array(byte *buffer, byte bufferSize) {
+String dump_byte_array(byte *buffer, byte bufferSize) {
   for (byte i = 0; i < bufferSize; i++) {
     Serial.print(buffer[i] < 0x10 ? " 0" : " ");
     Serial.print(buffer[i], HEX);
