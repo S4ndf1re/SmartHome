@@ -13,6 +13,8 @@
 
 #define CHIP_ID "01"
 
+#define MAX_TIMEOUT 20000
+
 
 typedef struct {
   char server[40] = "";
@@ -32,6 +34,8 @@ String willTopic;
 Config config;
 
 WiFiManager manager;
+
+String last_uid = "";
 
 
 bool shouldSave = false;
@@ -103,7 +107,7 @@ void setup() {
   willTopic = "doorlock/";
   willTopic += CHIP_ID;
   willTopic += "/status";
-  client->enableLastWillMessage("doorlock/" CHIP_ID "/status", "{ \"active\": false }", true);
+  client->enableLastWillMessage("doorlock/" CHIP_ID "/status", "false", true);
 
 
   SPI.begin();
@@ -111,6 +115,29 @@ void setup() {
 
   initRfidKey();
 }
+
+
+bool reselect_card() {
+  //-------------------------------------------------------
+  // Can also be used to see if card still available,
+  // true means it is false means card isnt there anymore
+  //-------------------------------------------------------
+  byte s;
+  byte req_buff[2];
+  byte req_buff_size = 2;
+  mfrc522.PCD_StopCrypto1();
+  s = mfrc522.PICC_HaltA();
+  delay(50);
+  s = mfrc522.PICC_WakeupA(req_buff, &req_buff_size);
+  dump_byte_array(req_buff, req_buff_size);
+  delay(50);
+  s = mfrc522.PICC_Select( &(mfrc522.uid), 0);
+  if ( mfrc522.GetStatusCodeName((MFRC522::StatusCode)s) == F("Timeout in communication.") ) {
+    return false;
+  }
+  return true;
+}
+
 
 bool compareByteArray(byte* a, int sizeA, byte* b, int sizeB) {
   if (sizeA != sizeB) {
@@ -124,73 +151,103 @@ bool compareByteArray(byte* a, int sizeA, byte* b, int sizeB) {
   return true;
 }
 
+
 void safeWrite(byte* data, int size) {
   if (size > MAX_BYTES) {
-    client->publish("doorlock/" CHIP_ID "/error", "{ \"error\": \"To many bytes. Max size is 48 bytes.\"");
+    client->publish("doorlock/" CHIP_ID "/error", "To many bytes. Max size is 48 bytes.");
+    last_uid = "";
+    return;
+  }
+
+  byte buffer[MAX_BYTES];
+  for (int i = 0; i < MAX_BYTES; i++) {
+    buffer[i] = 0;
+  }
+  for (int i = 0; i < size; i++) {
+    buffer[i] = data[i];
+  }
+
+  // Hardreset mfrc522 to write data. At this point, it would be a coind flip if mfrc522 is ready
+  // to write data on already placed chip. In order to remove randomness, hard reset.
+  if (!reselect_card()) {
+    client->publish("doorlock/" CHIP_ID "/error", "Card not present anymore");
     return;
   }
 
   MFRC522::StatusCode status;
-
-
+  mfrc522.PCD_StopCrypto1();
   status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, TRAILING_SECTOR, &key, &(mfrc522.uid));
   if (status != MFRC522::STATUS_OK) {
+    client->publish("doorlock/" CHIP_ID "/error", mfrc522.GetStatusCodeName(status));
+    last_uid = "";
     return;
   }
 
-  byte buffer[16] = {0};
-  int offset = 0;
   int blockAddr = DEFAULT_BLOCK;
-  for (int i = 0; i < 3; i++, blockAddr++) {
-    int remaining = min(16, size - offset);
-    for (int j = 0; j < remaining; j++) {
-      buffer[j] = data[j + offset];
-    }
-    offset += remaining;
-    if (remaining == 0) {
-      break;
-    }
 
-    bool success = false;
-    for (int tryIdx = 0; tryIdx < 3; tryIdx++) {
-      status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(blockAddr, buffer, 16);
-      byte newBuffer[16];
-      byte bufferSize = 16;
-      status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(blockAddr, newBuffer, &bufferSize);
-      if (compareByteArray(buffer, 16, newBuffer, 16)) {
-        success = true;
-        break;
-      }
-    }
 
-    if (!success) {
-      client->publish("doorlock/" CHIP_ID "/error", "{ \"error\": \"After 3 tries, data could not be written onto chip.\"");
-      break;
-    }
+  // Write 3 Blocks, 16 Bytes each. buffer will always be 48 Bytes in length.
+  bool success = true;
+  status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(blockAddr, buffer, 16);
+  if (status != MFRC522::STATUS_OK) {
+    client->publish("doorlock/" CHIP_ID "/error", mfrc522.GetStatusCodeName(status));
+    success = false;
+  } else {
+    client->publish("doorlock/" CHIP_ID "/error", "Written block 0");
+  }
 
+
+  status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(blockAddr + 1, buffer + 16, 16);
+  if (status != MFRC522::STATUS_OK) {
+    client->publish("doorlock/" CHIP_ID "/error", mfrc522.GetStatusCodeName(status));
+    success = false;
+  } else {
+    client->publish("doorlock/" CHIP_ID "/error", "Written block 1");
+  }
+
+
+  status = (MFRC522::StatusCode) mfrc522.MIFARE_Write(blockAddr + 2, buffer + 32, 16);
+  if (status != MFRC522::STATUS_OK) {
+    client->publish("doorlock/" CHIP_ID "/error", mfrc522.GetStatusCodeName(status));
+    success = false;
+  } else {
+    client->publish("doorlock/" CHIP_ID "/error", "Written block 2");
+  }
+
+  // If success, everything worked.
+  if (!success) {
+    client->publish("doorlock/" CHIP_ID "/error", "Data could not be written onto chip.");
+    client->publish("doorlock/" CHIP_ID "/write/ok", "false");
+  } else {
+    client->publish("doorlock/" CHIP_ID "/write/ok", "true");
   }
 
   // Halt PICC
   mfrc522.PICC_HaltA();
   // Stop encryption on PCD
   mfrc522.PCD_StopCrypto1();
+  last_uid = "";
 }
 
 void onDoorlockWrite(const String &msg) {
-  // TODO Base64 Decode
-  safeWrite((byte*)msg.c_str(), msg.length());
+
+  int decoded_length = Base64.decodedLength((char*) msg.c_str(), msg.length());
+  byte buffer[decoded_length];
+  Base64.decode((char*)buffer, (char*)msg.c_str(), msg.length());
+
+  safeWrite(buffer, decoded_length);
 }
 
 
 void onConnectionEstablished() {
-  client->publish("doorlock/" CHIP_ID "/status", "{ \"active\": true }", true);
-  client->subscribe("doorlock/" CHIP_ID "/write", onDoorlockWrite);
+  client->publish("doorlock/" CHIP_ID "/status", "true", true);
+  client->subscribe("doorlock/" CHIP_ID "/write/data", onDoorlockWrite);
 }
 
 
 void rfidRead(byte* data, int size) {
   if (size > MAX_BYTES) {
-    client->publish("doorlock/" CHIP_ID "/error", "{ \"error\": \"To many bytes. Max size is 48 bytes.\"");
+    client->publish("doorlock/" CHIP_ID "/error", "To many bytes. Max size is 48 bytes.");
     return;
   }
 
@@ -199,63 +256,92 @@ void rfidRead(byte* data, int size) {
 
   status = (MFRC522::StatusCode) mfrc522.PCD_Authenticate(MFRC522::PICC_CMD_MF_AUTH_KEY_A, TRAILING_SECTOR, &key, &(mfrc522.uid));
   if (status != MFRC522::STATUS_OK) {
+    client->publish("doorlock/" CHIP_ID "/error", mfrc522.GetStatusCodeName(status));
     return;
   }
 
-  byte buffer[16] = {0};
-  byte bufferSize = 16;
+  byte buffer[18] = {0};
+  byte bufferSize = 18;
   int offset = 0;
   int blockAddr = DEFAULT_BLOCK;
   for (int i = 0; i < 3; i++, blockAddr++) {
+    if (blockAddr + 1 % 4 == 0) {
+      blockAddr++;
+    }
     int remaining = min(16, size - offset);
-
-    offset += remaining;
     if (remaining == 0) {
       break;
     }
+
     status = (MFRC522::StatusCode) mfrc522.MIFARE_Read(blockAddr, buffer, &bufferSize);
+    if (status != MFRC522::STATUS_OK) {
+      client->publish("doorlock/" CHIP_ID "/error", mfrc522.GetStatusCodeName(status));
+      return;
+    }
 
     for (int j = 0; j < remaining; j++) {
       data[j + offset] = buffer[j];
     }
+
+    offset += remaining;
+
   }
+
 }
 
 void rfidLoop() {
-  
-  if ( ! mfrc522.PICC_IsNewCardPresent())
+
+  if ( ! mfrc522.PICC_IsNewCardPresent()) {
     return;
+  }
 
   // Select one of the cards
   if ( ! mfrc522.PICC_ReadCardSerial())
     return;
 
-  byte buffer[MAX_BYTES + 1];
+  size_t base64_size = Base64.encodedLength(mfrc522.uid.size);
+  byte base64_uid[base64_size + 1] = {};
+  Base64.encode((char*)base64_uid, (char*)mfrc522.uid.uidByte, mfrc522.uid.size);
+  base64_uid[base64_size] = '\0';
+
+  if (last_uid == String((char*) base64_uid)) {
+    // Halt PICC
+    mfrc522.PICC_HaltA();
+    // Stop encryption on PCD
+    mfrc522.PCD_StopCrypto1();
+    return;
+  }
+
+  client->publish("doorlock/" CHIP_ID "/read/uid", String((char*) base64_uid));
+
+  byte buffer[MAX_BYTES];
   rfidRead(buffer, MAX_BYTES);
-  buffer[MAX_BYTES] = '\0';
-  // TODO Base64 Encode
-  String data = "{ \"uid\": \"";
-  data += mfrc522.uid;
-  data += "\", \"data\": \"";
-  data += buffer;
-  data += "\" }";
-  Serial.println(data);
-  // client->publish("doorlock/" CHIP_ID "/read", data);
-  
+  base64_size = Base64.encodedLength(MAX_BYTES);
+  byte base64_data[base64_size + 1];
+  Base64.encode((char*)base64_data, (char*) buffer, MAX_BYTES);
+  base64_data[base64_size] = '\0';
+  client->publish("doorlock/" CHIP_ID "/read/data", String((char*) base64_data));
+
+  last_uid = String((char*) base64_uid);
+  // Halt PICC
+  mfrc522.PICC_HaltA();
+  // Stop encryption on PCD
+  mfrc522.PCD_StopCrypto1();
 }
 
 void loop() {
 
   client->loop();
   rfidLoop();
+  delay(100);
 
 }
 
 // Helper routine to dump a byte array as hex values to Serial
-String dump_byte_array(byte *buffer, byte bufferSize) {
+void dump_byte_array(byte *buffer, byte bufferSize) {
+  Serial.printf("Size: %d\n", bufferSize);
   for (byte i = 0; i < bufferSize; i++) {
-    Serial.print(buffer[i] < 0x10 ? " 0" : " ");
-    Serial.print(buffer[i], HEX);
+    Serial.printf("%02X ", buffer[i]);
   }
-
+  Serial.printf("\n");
 }
