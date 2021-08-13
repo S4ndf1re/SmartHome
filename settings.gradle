@@ -7,4 +7,4 @@ pluginManagement {
 }
 
 rootProject.name = "SmartHome"
-include("lib", "backend", "plugin_default", "default_controller")
+include("lib", "backend", "plugins_impl:plugin_default", "plugins_impl:plugin_doorlock_esp8266", "default_controller")

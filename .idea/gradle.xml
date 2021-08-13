@@ -15,7 +15,9 @@
             <option value="$PROJECT_DIR$/backend" />
             <option value="$PROJECT_DIR$/default_controller" />
             <option value="$PROJECT_DIR$/lib" />
-            <option value="$PROJECT_DIR$/plugin_default" />
+            <option value="$PROJECT_DIR$/plugins_impl" />
+            <option value="$PROJECT_DIR$/plugins_impl/plugin_default" />
+            <option value="$PROJECT_DIR$/plugins_impl/plugin_doorlock_esp8266" />
           </set>
         </option>
       </GradleProjectSettings>
