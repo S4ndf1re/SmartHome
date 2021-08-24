@@ -1,8 +1,12 @@
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish
+import gui.Container
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import java.util.*
+
+
+const val MAX_BYTES = 48
 
 enum class Status {
     ACTIVE,
@@ -15,13 +19,13 @@ enum class Mode {
     IDLE
 }
 
-class ESP8266Handler(var id: String, val mqtt: Mqtt3Client, val database: Database) {
-    var status: Status = Status.INACTIVE
-    var mode: Mode = Mode.IDLE
-    var currentUid: ByteArray = ByteArray(0)
-    var currentData: ByteArray = ByteArray(0)
-    var dataCount = 0
-    var user: String? = null
+class ESP8266Handler(private var id: String, private val mqtt: Mqtt3Client, private val database: Database) {
+    private var status: Status = Status.INACTIVE
+    private var mode: Mode = Mode.IDLE
+    private var currentUid: ByteArray = ByteArray(0)
+    private var currentData: ByteArray = ByteArray(0)
+    private var dataCount = 0
+    private var user: String? = null
 
     init {
         mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/status").callback { statusCallback(it) }.send()
@@ -61,7 +65,17 @@ class ESP8266Handler(var id: String, val mqtt: Mqtt3Client, val database: Databa
     private fun writeOkCallback(publish: Mqtt3Publish) {
         if (publish.payload.isPresent) {
             if (publish.payloadAsBytes.contentEquals("true".toByteArray())) {
-                TODO("Implement Database write and door open")
+
+                database.update(Mifare1k) {
+                    set(it.data, currentData)
+                    where {
+                        it.uid eq currentUid
+                    }
+                }
+
+                if (this.mode == Mode.CHECKING) {
+                    this.performDoorOpen()
+                }
             }
         }
     }
@@ -110,6 +124,13 @@ class ESP8266Handler(var id: String, val mqtt: Mqtt3Client, val database: Databa
         }
     }
 
+    private fun randomByteArray(): ByteArray {
+        val random = Random()
+        val array = ByteArray(MAX_BYTES)
+        random.nextBytes(array)
+        return array
+    }
+
     fun authenticate() {
         if (this.user == null) {
             return
@@ -119,9 +140,53 @@ class ESP8266Handler(var id: String, val mqtt: Mqtt3Client, val database: Databa
         if (!this.doesCurrentChipExist()) {
             this.insertCurrentChip()
         }
+
+        this.currentData = this.randomByteArray()
+        this.performWrite()
+    }
+
+    private fun performWrite() {
+        val payload = Base64.getEncoder().encode(this.currentData)
+        mqtt.toAsync().publishWith().topic("doorlock/${this.id}/write/data").payload(payload).send().join()
     }
 
     private fun check() {
-        
+        val validUid = database.from(Mifare1k).select().where {
+            Mifare1k.uid eq this.currentUid
+        }.map { it[Mifare1k.data].contentEquals(this.currentData) }.any()
+
+        if (validUid) {
+            this.authenticate()
+        }
+    }
+
+    private fun performDoorOpen() {
+        mqtt.toAsync().publishWith().topic("doorlock/${this.id}/open")
+    }
+
+    fun getContainer(): Container {
+        return Container.create("Doorlock-${this.id}") {
+            button("check-${id}") {
+                text = "Check"
+                onClick = {
+                    user = it
+                    mode = Mode.CHECKING
+                }
+            }
+            button("auth-${id}") {
+                text = "Authenticate"
+                onClick = {
+                    user = it
+                    mode = Mode.CHECKING
+                }
+            }
+            button("stop-${id}") {
+                text = "Stop"
+                onClick = {
+                    user = it
+                    mode = Mode.IDLE
+                }
+            }
+        }
     }
 }
