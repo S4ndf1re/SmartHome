@@ -7,7 +7,6 @@ plugins {
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
@@ -28,13 +27,11 @@ dependencies {
 compileKotlin {
     kotlinOptions {
         jvmTarget = "13"
-        languageVersion = "1.5"
     }
 }
 
 compileTestKotlin {
     kotlinOptions {
         jvmTarget = "13"
-        languageVersion = "1.5"
     }
 }

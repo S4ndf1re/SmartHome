@@ -8,23 +8,22 @@ plugins {
 
 repositories {
     mavenCentral()
-    jcenter()
 }
 
 dependencies {
-    implementation 'com.hivemq:hivemq-mqtt-client:1.2.1'
-    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.4.30'
+    implementation 'com.hivemq:hivemq-mqtt-client:1.2.2'
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.5.21'
     implementation project(":lib")
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.4.2-native-mt'
-    testImplementation 'org.jetbrains.kotlin:kotlin-test'
-    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
-    dokkaHtmlPlugin "org.jetbrains.dokka:kotlin-as-java-plugin:1.4.30"
-    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.5.1-native-mt'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test:1.5.21'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit:1.5.21'
+    dokkaHtmlPlugin 'org.jetbrains.dokka:kotlin-as-java-plugin:1.5.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-core:1.2.2'
     implementation "net.devrieze:xmlutil-jvm:0.80.1"
     implementation "net.devrieze:xmlutil-serialization-jvm:0.80.1"
-    implementation 'org.ktorm:ktorm-core:3.4.0'
-    implementation 'org.ktorm:ktorm-support-mysql:3.4.0'
-    implementation 'mysql:mysql-connector-java:8.0.24'
+    implementation 'org.ktorm:ktorm-core:3.4.1'
+    implementation 'org.ktorm:ktorm-support-mysql:3.4.1'
+    implementation 'mysql:mysql-connector-java:8.0.25'
 }
 
 application {
