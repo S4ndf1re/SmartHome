@@ -1,7 +1,6 @@
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import gui.Child
 import gui.Gui
-import gui.ToJson
 import io.ktor.application.*
 import io.ktor.auth.*
 import io.ktor.features.*
@@ -80,23 +79,23 @@ class Plugin : IController {
         }
     }
 
-    private fun configureData(routing: Route, child: Child, key: String, name: String) {
-        if (child is gui.Data<*>) {
-            val child = child as gui.Data<ToJson>
-            child.updateRequest = "$key/$name/${child.name}/request".toLowerCase()
-            child.updateSocket = "$key/$name/${child.name}/socket".toLowerCase()
-            routing.webSocket(child.updateSocket) {
-                child.updateFcts[call.request.origin.host] = { data ->
-                    suspend {
-                        outgoing.send(Frame.Text(data.toJson()))
-                    }
-                }
-            }
-            routing.get(child.updateRequest) {
-                call.respondText { child.getState()?.toJson() ?: "" }
-            }
-        }
-    }
+    // private fun configureData(routing: Route, child: Child, key: String, name: String) {
+    //     if (child is gui.Data<*>) {
+    //         val child = child as gui.Data<ToJson>
+    //         child.updateRequest = "$key/$name/${child.name}/request".toLowerCase()
+    //         child.updateSocket = "$key/$name/${child.name}/socket".toLowerCase()
+    //         routing.webSocket(child.updateSocket) {
+    //             child.updateFcts[call.request.origin.host] = { data ->
+    //                 suspend {
+    //                     outgoing.send(Frame.Text(data.toJson()))
+    //                 }
+    //             }
+    //         }
+    //         routing.get(child.updateRequest) {
+    //             call.respondText { child.getState()?.toJson() ?: "" }
+    //         }
+    //     }
+    // }
 
     override fun init(handler: Mqtt3Client, database: Database, pluginList: Map<String, Plugin<IPlugin>>): Boolean {
         this.pluginList = pluginList
@@ -141,7 +140,7 @@ class Plugin : IController {
                                     configureClickable(this, child, key, name)
                                     configureOnOffState(this, child, key, name)
                                     configureTextInput(this, child, key, name)
-                                    configureData(this, child, key, name)
+                                    // configureData(this, child, key, name)
                                 }
                             }
                         }

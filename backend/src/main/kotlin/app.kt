@@ -16,6 +16,7 @@ fun main() {
     try {
         val client = MqttClient.builder()
             .useMqttVersion3()
+            .automaticReconnectWithDefaultConfig()
             .willPublish().topic("backend/status/active")
             .qos(MqttQos.AT_LEAST_ONCE)
             .payload("false".toByteArray())

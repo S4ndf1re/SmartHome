@@ -1,0 +1,7 @@
+<?xml version="1.0" ?>
+<PluginDescriptor>
+    <author>None</author>
+    <version>1.0.0</version>
+    <jarName>plugin_doorlock_esp8266-1.0-SNAPSHOT.jar</jarName>
+    <pluginClass>Plugin</pluginClass>
+</PluginDescriptor>
