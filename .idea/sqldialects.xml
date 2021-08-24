@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="SqlDialectMappings">
-    <file url="file://$PROJECT_DIR$/plugins_impl/plugin_doorlock_esp8266/sql_script.sql" dialect="MySQL" />
-    <file url="file://$PROJECT_DIR$/sql_script.sql" dialect="MySQL" />
-  </component>
-</project>

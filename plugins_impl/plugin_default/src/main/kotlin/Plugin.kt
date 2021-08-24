@@ -59,8 +59,9 @@ class Plugin : IPlugin {
                     println("Me on ")
                     status = true
                 }
-                onOffState = {
+                onOffState = { user ->
                     println("Me off ")
+                    println(user)
                     status = false
                 }
                 getCurrent = {

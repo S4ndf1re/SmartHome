@@ -7,5 +7,5 @@ interface Child {
     /**
      * The name of the child
      */
-    var name: String
+    abstract var name: String
 }

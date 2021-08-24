@@ -12,7 +12,6 @@ import io.ktor.routing.*
 import io.ktor.serialization.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
-import io.ktor.util.*
 import io.ktor.websocket.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.encodeToString
@@ -42,17 +41,23 @@ class Plugin : IController {
             child.onGetStateRequest = "$key/$name/${child.name}/get".toLowerCase()
             routing.get(child.onOnStateRequest) {
                 child.onOnState(call.principal<UserIdPrincipal>()?.name!!)
-                call.respondText("{ \"status\": ${child.getCurrent(call.principal<UserIdPrincipal>()?.name!!)} }",
-                    status = HttpStatusCode.OK)
+                call.respondText(
+                    "{ \"status\": ${child.getCurrent(call.principal<UserIdPrincipal>()?.name!!)} }",
+                    status = HttpStatusCode.OK
+                )
             }
             routing.get(child.onOffStateRequest) {
                 child.onOffState(call.principal<UserIdPrincipal>()?.name!!)
-                call.respondText("{ \"status\": ${child.getCurrent(call.principal<UserIdPrincipal>()?.name!!)} }",
-                    status = HttpStatusCode.OK)
+                call.respondText(
+                    "{ \"status\": ${child.getCurrent(call.principal<UserIdPrincipal>()?.name!!)} }",
+                    status = HttpStatusCode.OK
+                )
             }
             routing.get(child.onGetStateRequest) {
-                call.respondText("{ \"status\": ${child.getCurrent(call.principal<UserIdPrincipal>()?.name!!)} }",
-                    status = HttpStatusCode.OK)
+                call.respondText(
+                    "{ \"status\": ${child.getCurrent(call.principal<UserIdPrincipal>()?.name!!)} }",
+                    status = HttpStatusCode.OK
+                )
             }
         }
     }
@@ -79,23 +84,40 @@ class Plugin : IController {
         }
     }
 
-    // private fun configureData(routing: Route, child: Child, key: String, name: String) {
-    //     if (child is gui.Data<*>) {
-    //         val child = child as gui.Data<ToJson>
-    //         child.updateRequest = "$key/$name/${child.name}/request".toLowerCase()
-    //         child.updateSocket = "$key/$name/${child.name}/socket".toLowerCase()
-    //         routing.webSocket(child.updateSocket) {
-    //             child.updateFcts[call.request.origin.host] = { data ->
-    //                 suspend {
-    //                     outgoing.send(Frame.Text(data.toJson()))
-    //                 }
-    //             }
-    //         }
-    //         routing.get(child.updateRequest) {
-    //             call.respondText { child.getState()?.toJson() ?: "" }
-    //         }
-    //     }
-    // }
+    private fun configureData(routing: Route, child: Child, key: String, name: String) {
+        if (child is gui.Data) {
+            child.updateRequest = "$key/$name/${child.name}/request".toLowerCase()
+            child.updateSocket = "$key/$name/${child.name}/socket".toLowerCase()
+            routing.webSocket(child.updateSocket) {
+                val updateFunction: suspend (Child) -> Unit = { element ->
+                    val json = Gui.getJsonDefault()
+                    val jsonString = json.encodeToString(element)
+                    outgoing.send(Frame.Text(jsonString))
+                }
+                child.registerUpdateFunction(updateFunction)
+
+                for (frame in incoming) {
+                    when (frame) {
+                        is Frame.Close -> {
+                            child.unregisterUpdateFunction(updateFunction)
+                        }
+                        else -> {
+                            // Do nothing. We are not expecting to receive any data
+                        }
+                    }
+                }
+            }
+            routing.get(child.updateRequest) {
+                val json = Gui.getJsonDefault()
+                if (child.getState() == null) {
+                    call.respond(HttpStatusCode.NoContent, "")
+                } else {
+                    val jsonString = json.encodeToString(child.getState()!!)
+                    call.respondText { jsonString }
+                }
+            }
+        }
+    }
 
     override fun init(handler: Mqtt3Client, database: Database, pluginList: Map<String, Plugin<IPlugin>>): Boolean {
         this.pluginList = pluginList
@@ -140,16 +162,15 @@ class Plugin : IController {
                                     configureClickable(this, child, key, name)
                                     configureOnOffState(this, child, key, name)
                                     configureTextInput(this, child, key, name)
-                                    // configureData(this, child, key, name)
+                                    configureData(this, child, key, name)
                                 }
                             }
                         }
                     }
 
                     get("gui") {
-                        val js = gui.getJsonDefault()
+                        val js = Gui.getJsonDefault()
                         call.respondText(js.encodeToString(gui), status = HttpStatusCode.OK)
-
                     }
                 }
             }
