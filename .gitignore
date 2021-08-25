@@ -35,15 +35,14 @@ hs_err_pid*
 build
 
 # dependencies
-/node_modules
-/.pnp
+node_modules
+.pnp
 .pnp.js
 
 # testing
-/coverage
+coverage
 
 # production
-/build
 
 # misc
 .DS_Store
