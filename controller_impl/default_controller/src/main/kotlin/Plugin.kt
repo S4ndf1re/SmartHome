@@ -36,9 +36,9 @@ class Plugin : IController {
 
     private fun configureOnOffState(routing: Route, child: Child, key: String, name: String) {
         if (child is gui.OnOffState) {
-            child.onOnStateRequest = "$key/$name/${child.name}/on".toLowerCase()
-            child.onOffStateRequest = "$key/$name/${child.name}/off".toLowerCase()
-            child.onGetStateRequest = "$key/$name/${child.name}/get".toLowerCase()
+            child.onOnStateRequest = "$key/$name/${child.name}/on".lowercase()
+            child.onOffStateRequest = "$key/$name/${child.name}/off".lowercase()
+            child.onGetStateRequest = "$key/$name/${child.name}/get".lowercase()
             routing.get(child.onOnStateRequest) {
                 child.onOnState(call.principal<UserIdPrincipal>()?.name!!)
                 call.respondText(
@@ -64,7 +64,7 @@ class Plugin : IController {
 
     private fun configureClickable(routing: Route, child: Child, key: String, name: String) {
         if (child is gui.Clickable) {
-            child.onClickRequest = "$key/$name/${child.name}".toLowerCase()
+            child.onClickRequest = "$key/$name/${child.name}".lowercase()
             routing.get(child.onClickRequest) {
                 child.onClick(call.principal<UserIdPrincipal>()?.name!!)
                 call.respondText("", status = HttpStatusCode.OK)
@@ -74,7 +74,7 @@ class Plugin : IController {
 
     private fun configureTextInput(routing: Route, child: Child, key: String, name: String) {
         if (child is gui.TextInput) {
-            child.updateRequest = "$key/$name/${child.name}".toLowerCase()
+            child.updateRequest = "$key/$name/${child.name}".lowercase()
             routing.post(child.updateRequest) {
                 val data = call.receive<TextInputData>()
                 child.update(call.principal<UserIdPrincipal>()?.name!!, data.text)
@@ -86,8 +86,8 @@ class Plugin : IController {
 
     private fun configureData(routing: Route, child: Child, key: String, name: String) {
         if (child is gui.Data) {
-            child.updateRequest = "$key/$name/${child.name}/request".toLowerCase()
-            child.updateSocket = "$key/$name/${child.name}/socket".toLowerCase()
+            child.updateRequest = "$key/$name/${child.name}/request".lowercase()
+            child.updateSocket = "$key/$name/${child.name}/socket".lowercase()
             routing.webSocket(child.updateSocket) {
                 val updateFunction: suspend (Child) -> Unit = { element ->
                     val json = Gui.getJsonDefault()

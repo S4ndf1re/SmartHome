@@ -1,10 +1,9 @@
 pluginManagement {
     repositories {
         gradlePluginPortal()
-        jcenter()
         mavenCentral()
     }
 }
 
 rootProject.name = "SmartHome"
-include("lib", "backend", "plugins_impl:plugin_default", "plugins_impl:plugin_doorlock_esp8266", "default_controller")
+include("lib", "backend", "plugins_impl:plugin_default", "plugins_impl:plugin_doorlock_esp8266", "controller_impl:default_controller")
