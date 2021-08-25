@@ -12,13 +12,13 @@ repositories {
 dependencies {
     implementation 'com.hivemq:hivemq-mqtt-client:1.2.1'
     implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.4.30'
-    dokkaHtmlPlugin "org.jetbrains.dokka:kotlin-as-java-plugin:1.4.30"
+    dokkaHtmlPlugin "org.jetbrains.dokka:kotlin-as-java-plugin:1.5.0"
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0'
-    implementation "net.devrieze:xmlutil-jvm:0.80.1"
+    implementation "io.github.pdvrieze.xmlutil:core:0.82.0"
     implementation project(":lib")
-    implementation "net.devrieze:xmlutil-serialization-jvm:0.80.1"
+    implementation "io.github.pdvrieze.xmlutil:serialization-jvm:0.82.0"
     implementation 'org.ktorm:ktorm-support-mysql:3.4.0'
     implementation 'mysql:mysql-connector-java:8.0.24'
 }

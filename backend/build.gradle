@@ -19,8 +19,8 @@ dependencies {
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit:1.5.21'
     dokkaHtmlPlugin 'org.jetbrains.dokka:kotlin-as-java-plugin:1.5.0'
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-core:1.2.2'
-    implementation "net.devrieze:xmlutil-jvm:0.80.1"
-    implementation "net.devrieze:xmlutil-serialization-jvm:0.80.1"
+    implementation "io.github.pdvrieze.xmlutil:core-jvm:0.82.0"
+    implementation "io.github.pdvrieze.xmlutil:serialization-jvm:0.82.0"
     implementation 'org.ktorm:ktorm-core:3.4.1'
     implementation 'org.ktorm:ktorm-support-mysql:3.4.1'
     implementation 'mysql:mysql-connector-java:8.0.25'
