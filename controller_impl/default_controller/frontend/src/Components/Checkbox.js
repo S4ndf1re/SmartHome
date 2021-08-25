@@ -42,7 +42,7 @@ class Checkbox extends React.Component {
     }
 
     clickEvent() {
-        let path
+        let path = ""
         if (!this.state.checked) {
             path = this.state.onStateClick
         } else {

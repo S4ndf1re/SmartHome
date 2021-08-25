@@ -39,7 +39,7 @@
     transition: background-color 0.2s linear;
     z-index: 5;
     position: absolute;
-    left: 0;
+    left: 0px;
 }
 
 [type="checkbox"] + label:after {
@@ -49,7 +49,7 @@
     background-color: #fff;
     content: "";
     transition: margin 0.1s linear;
-    box-shadow: 0 0 5px #aaa;
+    box-shadow: 0px 0px 5px #aaa;
     position: absolute;
     left: 2px;
     top: 2px;
