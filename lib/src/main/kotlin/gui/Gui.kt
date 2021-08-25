@@ -6,18 +6,34 @@ import kotlinx.serialization.modules.SerializersModule
 import kotlinx.serialization.modules.polymorphic
 import kotlinx.serialization.modules.subclass
 
+/**
+ * [Gui] is the complete frontend container
+ */
 @Serializable
 class Gui() {
 
+    /**
+     * [containers] is the list of all [Container]s created by underlying [plugin.implementations.plugin.IPlugin]
+     */
     private val containers = arrayListOf<Container>()
 
     companion object Factory {
+        /**
+         * [create] will generate a new [Gui] with a configuration function
+         * @param [f] is the used configuration function
+         * @return A new [Gui]
+         */
         fun create(f: Gui.() -> Unit): Gui {
             val gui = Gui()
             gui.f()
             return gui
         }
 
+        /**
+         * [getSerializationsModule] will create a complete list of all JSON-Inheritance. This is needed because Sealed Class
+         * is unusable in this project structure.
+         * @return A complete inheritance list as a [SerializersModule]
+         */
         private fun getSerializationsModule(): SerializersModule {
             return SerializersModule {
                 polymorphic(Widget::class) {
@@ -45,6 +61,10 @@ class Gui() {
             }
         }
 
+        /**
+         * [getJsonDefault] generates a new [Json]-engine using the module from [getSerializationsModule]
+         * @return A new [Json]-Engine
+         */
         fun getJsonDefault(): Json {
             return Json {
                 serializersModule = getSerializationsModule()
@@ -54,6 +74,10 @@ class Gui() {
         }
     }
 
+    /**
+     * [add] adds a [Container] to [containers]
+     * @param [cont] the newly added [Container]
+     */
     fun add(cont: Container) {
         this.containers.add(cont)
     }

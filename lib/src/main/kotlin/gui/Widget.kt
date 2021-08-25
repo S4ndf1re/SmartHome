@@ -1,8 +1,8 @@
 package gui
 
 /**
- * A Widget is a child, that can have its own childs.
- * It is mend as a gui widget like a html div or something similar.
+ * A [Widget] is a [Child], that can have its own [Child]ren.
+ * It is meant as a gui [Widget] like a html div or something similar.
  */
 interface Widget {
     var list: MutableList<Child>
