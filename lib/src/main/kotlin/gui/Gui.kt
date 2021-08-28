@@ -38,24 +38,23 @@ class Gui() {
             return SerializersModule {
                 polymorphic(Widget::class) {
                     subclass(Container::class)
-                    subclass(HBox::class)
-                    subclass(VBox::class)
-                    subclass(Form::class)
+                    //subclass(HBox::class)
+                    //subclass(VBox::class)
                 }
                 polymorphic(Child::class) {
                     subclass(Button::class)
                     subclass(Container::class)
-                    subclass(HBox::class)
-                    subclass(HSplitter::class)
-                    subclass(Label::class)
-                    subclass(VBox::class)
-                    subclass(VSplitter::class)
-                    subclass(Slider::class)
+                    // subclass(HBox::class)
+                    // subclass(HSplitter::class)
+                    // subclass(Label::class)
+                    // subclass(VBox::class)
+                    // subclass(VSplitter::class)
+                    // subclass(Slider::class)
                     subclass(Checkbox::class)
-                    subclass(ColorField::class)
+                    // subclass(ColorField::class)
                     subclass(Data::class)
-                    subclass(Form::class)
-                    subclass(Image::class)
+                    // subclass(Form::class)
+                    // subclass(Image::class)
                     subclass(TextField::class)
                 }
             }

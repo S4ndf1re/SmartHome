@@ -15,8 +15,6 @@ class Plugin : IPlugin {
             .send().join()
         this.handler = handler
         this.database = database
-        val esp = ESP8266Handler("01", handler, database)
-        esp.authenticate()
         return true
     }
 
@@ -33,11 +31,11 @@ class Plugin : IPlugin {
 
     private fun statusHandler(publish: Mqtt3Publish) {
         val id = publish.topic.levels[1]
-        println("Found id: $id")
         if (!handlers.containsKey(id) && handler != null && database != null) {
+            println("Found id: $id")
             println("Inserted $id to list")
             handlers[id] = ESP8266Handler(id, handler!!, database!!)
         }
     }
-   
+
 }

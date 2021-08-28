@@ -305,13 +305,13 @@ void rfidLoop() {
   Base64.encode((char*)base64_uid, (char*)mfrc522.uid.uidByte, mfrc522.uid.size);
   base64_uid[base64_size] = '\0';
 
-  if (last_uid == String((char*) base64_uid)) {
-    // Halt PICC
-    mfrc522.PICC_HaltA();
-    // Stop encryption on PCD
-    mfrc522.PCD_StopCrypto1();
-    return;
-  }
+//  if (last_uid == String((char*) base64_uid)) {
+//    // Halt PICC
+//    mfrc522.PICC_HaltA();
+//    // Stop encryption on PCD
+//    mfrc522.PCD_StopCrypto1();
+//    return;
+//  }
 
   client->publish("doorlock/" CHIP_ID "/read/uid", String((char*) base64_uid));
 

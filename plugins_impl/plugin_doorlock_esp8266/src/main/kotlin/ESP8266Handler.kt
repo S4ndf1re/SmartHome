@@ -1,23 +1,10 @@
+import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish
 import gui.Container
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import java.util.*
-
-
-const val MAX_BYTES = 48
-
-enum class Status {
-    ACTIVE,
-    INACTIVE
-}
-
-enum class Mode {
-    CHECKING,
-    AUTHENTICATING,
-    IDLE
-}
 
 class ESP8266Handler(private var id: String, private val mqtt: Mqtt3Client, private val database: Database) {
     private var status: Status = Status.INACTIVE
@@ -28,22 +15,24 @@ class ESP8266Handler(private var id: String, private val mqtt: Mqtt3Client, priv
     private var user: String? = null
 
     init {
-        mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/status").callback { statusCallback(it) }.send()
-            .join()
-        mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/error").callback { errorCallback(it) }.send().join()
-        mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/write/ok").callback { writeOkCallback(it) }.send()
-            .join()
-        mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/read/uid").callback { uidCallback(it) }.send().join()
-        mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/read/data").callback { dataCallback(it) }.send()
-            .join()
+        mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/status").qos(MqttQos.EXACTLY_ONCE)
+            .callback { statusCallback(it) }.send()
+        mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/error").qos(MqttQos.EXACTLY_ONCE)
+            .callback { errorCallback(it) }.send()
+        mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/write/ok").qos(MqttQos.EXACTLY_ONCE)
+            .callback { writeOkCallback(it) }.send()
+        mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/read/uid").qos(MqttQos.EXACTLY_ONCE)
+            .callback { uidCallback(it) }.send()
+        mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/read/data").qos(MqttQos.EXACTLY_ONCE)
+            .callback { dataCallback(it) }.send()
     }
 
     fun close() {
-        mqtt.toAsync().unsubscribeWith().topicFilter("doorlock/${id}/status").send().join()
-        mqtt.toAsync().unsubscribeWith().topicFilter("doorlock/${id}/error").send().join()
-        mqtt.toAsync().unsubscribeWith().topicFilter("doorlock/${id}/write/ok").send().join()
-        mqtt.toAsync().unsubscribeWith().topicFilter("doorlock/${id}/read/uid").send().join()
-        mqtt.toAsync().unsubscribeWith().topicFilter("doorlock/${id}/read/data").send().join()
+        mqtt.toAsync().unsubscribeWith().topicFilter("doorlock/${id}/status").send()
+        mqtt.toAsync().unsubscribeWith().topicFilter("doorlock/${id}/error").send()
+        mqtt.toAsync().unsubscribeWith().topicFilter("doorlock/${id}/write/ok").send()
+        mqtt.toAsync().unsubscribeWith().topicFilter("doorlock/${id}/read/uid").send()
+        mqtt.toAsync().unsubscribeWith().topicFilter("doorlock/${id}/read/data").send()
     }
 
     private fun statusCallback(publish: Mqtt3Publish) {
@@ -53,19 +42,21 @@ class ESP8266Handler(private var id: String, private val mqtt: Mqtt3Client, priv
             } else {
                 this.status = Status.INACTIVE
             }
+            println("Changed ${this.id} to ${this.status}")
         }
     }
 
     private fun errorCallback(publish: Mqtt3Publish) {
         if (publish.payload.isPresent) {
-            println(publish.payloadAsBytes.toString())
+            println(String(publish.payloadAsBytes))
         }
     }
 
     private fun writeOkCallback(publish: Mqtt3Publish) {
         if (publish.payload.isPresent) {
             if (publish.payloadAsBytes.contentEquals("true".toByteArray())) {
-
+                println("Data for ChipID ${this.id} was written successfully. Update DB")
+                println("NEW-DATA: ${this.currentData.toHexString()}")
                 database.update(Mifare1k) {
                     set(it.data, currentData)
                     where {
@@ -74,6 +65,7 @@ class ESP8266Handler(private var id: String, private val mqtt: Mqtt3Client, priv
                 }
 
                 if (this.mode == Mode.CHECKING) {
+                    println("Opening door for ${this.id}")
                     this.performDoorOpen()
                 }
             }
@@ -150,18 +142,27 @@ class ESP8266Handler(private var id: String, private val mqtt: Mqtt3Client, priv
         mqtt.toAsync().publishWith().topic("doorlock/${this.id}/write/data").payload(payload).send().join()
     }
 
-    private fun check() {
-        val validUid = database.from(Mifare1k).select().where {
-            Mifare1k.uid eq this.currentUid
-        }.map { it[Mifare1k.data].contentEquals(this.currentData) }.any()
+    private fun ByteArray.toHexString(): String {
+        return this.joinToString("") {
+            java.lang.String.format("%02x", it)
+        }
+    }
 
-        if (validUid) {
+    private fun check() {
+        val validUidContent = database.from(Mifare1k).select().where {
+            Mifare1k.uid eq this.currentUid
+        }.map {
+            it[Mifare1k.data].contentEquals(this.currentData)
+        }
+        if (validUidContent.any { it }) {
             this.authenticate()
+        } else {
+            println("No existing uid found in DB or Content is different")
         }
     }
 
     private fun performDoorOpen() {
-        mqtt.toAsync().publishWith().topic("doorlock/${this.id}/open")
+        mqtt.toAsync().publishWith().topic("doorlock/${this.id}/open").payload("true".toByteArray()).send().join()
     }
 
     fun getContainer(): Container {
@@ -171,13 +172,15 @@ class ESP8266Handler(private var id: String, private val mqtt: Mqtt3Client, priv
                 onClick = {
                     user = it
                     mode = Mode.CHECKING
+                    println("Changed mode to CHECKING")
                 }
             }
             button("auth-${id}") {
                 text = "Authenticate"
                 onClick = {
                     user = it
-                    mode = Mode.CHECKING
+                    mode = Mode.AUTHENTICATING
+                    println("Changed mode to AUTHENTICATING")
                 }
             }
             button("stop-${id}") {
@@ -185,6 +188,7 @@ class ESP8266Handler(private var id: String, private val mqtt: Mqtt3Client, priv
                 onClick = {
                     user = it
                     mode = Mode.IDLE
+                    println("Changed mode to IDLE")
                 }
             }
         }

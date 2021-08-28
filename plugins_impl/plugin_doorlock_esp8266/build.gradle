@@ -34,3 +34,7 @@ compileTestKotlin {
         jvmTarget = "13"
     }
 }
+
+jar {
+    from sourceSets.main.allSource
+}
