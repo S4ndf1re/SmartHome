@@ -1,7 +1,7 @@
 plugins {
-    id 'org.jetbrains.kotlin.jvm' version '1.5.21'
+    id 'org.jetbrains.kotlin.jvm' version '1.5.31'
     id "org.jetbrains.dokka" version "1.5.0"
-    id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.21'
+    id 'org.jetbrains.kotlin.plugin.serialization' version '1.5.31'
 }
 
 allprojects {
@@ -20,11 +20,11 @@ allprojects {
 
 dependencies {
 
-    testImplementation 'org.jetbrains.kotlin:kotlin-test:1.5.21'
-    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit:1.5.21'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test:1.5.31'
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-junit:1.5.31'
     implementation 'com.hivemq:hivemq-mqtt-client:1.2.2'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.1-native-mt'
-    dokkaHtmlPlugin 'org.jetbrains.dokka:kotlin-as-java-plugin:1.5.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2-native-mt'
+    dokkaHtmlPlugin 'org.jetbrains.dokka:kotlin-as-java-plugin:1.5.30'
 }
 
 test {
