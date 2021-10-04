@@ -24,7 +24,7 @@ class TextField extends React.Component {
         return (
             <div className="textfieldClass default-margin default-padding blog-shadow-dreamy">
                 <label className="defaultFont" htmlFor={this.getID()}>{this.state.text}</label>
-                <input id={this.getID()} onKeyDown={(key) => this.clickEvent(key)}
+                <input id={this.getID()} onChange={(key) => this.clickEvent(key)}
                        className="textInputClass defaultFont"/>
             </div>
         )
@@ -32,22 +32,20 @@ class TextField extends React.Component {
 
     clickEvent(key) {
         console.log(key)
-        if (key.keyCode === 13) {
-            let b = document.getElementById(this.getID()).value
-            let c = JSON.stringify({text: b})
-            window.fetch("http://" + window.location.hostname + ":1337/" + this.state.updateRequest, {
-                method: 'POST',
-                mode: 'cors',
-                cache: 'no-cache',
-                credentials: 'include',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                redirect: 'follow',
-                referrerPolicy: "no-referrer",
-                body: c
-            });
-        }
+        let b = document.getElementById(this.getID()).value
+        let c = JSON.stringify({text: b})
+        window.fetch("http://" + window.location.hostname + ":1337/" + this.state.updateRequest, {
+            method: 'POST',
+            mode: 'cors',
+            cache: 'no-cache',
+            credentials: 'include',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            redirect: 'follow',
+            referrerPolicy: "no-referrer",
+            body: c
+        });
     }
 }
 
