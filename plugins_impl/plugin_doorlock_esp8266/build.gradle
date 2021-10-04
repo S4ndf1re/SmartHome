@@ -21,6 +21,7 @@ dependencies {
     implementation "io.github.pdvrieze.xmlutil:serialization-jvm:0.82.0"
     implementation 'org.ktorm:ktorm-support-mysql:3.4.0'
     implementation 'mysql:mysql-connector-java:8.0.24'
+    implementation 'com.github.S4ndf1re:Klog:master-SNAPSHOT'
 }
 
 compileKotlin {

@@ -1,3 +1,4 @@
+import com.github.s4ndf1re.ILogger
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import gui.Container
 import org.ktorm.database.Database
@@ -15,7 +16,7 @@ class Plugin : IPlugin {
     private var newPassword2 = ""
     private var status = false
 
-    override fun init(handler: Mqtt3Client, database: Database): Boolean {
+    override fun init(handler: Mqtt3Client, database: Database, logger: ILogger): Boolean {
         this.database = database
         return true
     }

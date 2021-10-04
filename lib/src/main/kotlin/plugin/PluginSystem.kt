@@ -1,5 +1,6 @@
 package plugin
 
+import com.github.s4ndf1re.ILogger
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import org.ktorm.database.Database
 import java.io.File
@@ -80,9 +81,9 @@ class PluginSystem<T> {
      * @param client Defines the global MQTT client
      * @param database Defines the database
      */
-    fun start(client: Mqtt3Client, database: Database) {
-        for ((_, v) in this.pluginList) {
-            v.start(client, database)
+    fun start(client: Mqtt3Client, database: Database, logger: ILogger) {
+        for ((name, v) in this.pluginList) {
+            v.start(client, database, logger.createNode(name))
         }
     }
 

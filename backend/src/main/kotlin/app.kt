@@ -1,3 +1,5 @@
+import com.github.s4ndf1re.LogLevel
+import com.github.s4ndf1re.Logger
 import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import org.ktorm.database.Database
@@ -31,12 +33,16 @@ fun main() {
             .send()
 
 
-        val database = Database.connect("jdbc:mysql://${config.sql.hostname}:${config.sql.port}/${config.sql.database}",
+        val database = Database.connect(
+            "jdbc:mysql://${config.sql.hostname}:${config.sql.port}/${config.sql.database}",
             user = config.sql.username,
-            password = config.sql.password)
+            password = config.sql.password
+        )
 
-        system.start(client, database)
-        controllers.start(client, database)
+        val logger = Logger("Backend System", LogLevel.DEBUG)
+
+        system.start(client, database, logger.createNode("Plugins"))
+        controllers.start(client, database, logger.createNode("Controllers"))
 
         val shutdown = {
             system.stop()
@@ -55,9 +61,13 @@ fun main() {
 
         while (true) {
             print("> ")
-            val word = scanner.next()
+            val word = scanner.next().lowercase().trim()
             if (word == "exit") {
                 break
+            } else if (word == "save") {
+                logger.save("log.json")
+            } else if (word == "show") {
+                logger.show()
             }
             println()
         }

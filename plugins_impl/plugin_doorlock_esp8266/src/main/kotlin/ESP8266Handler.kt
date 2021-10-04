@@ -1,3 +1,4 @@
+import com.github.s4ndf1re.ILogger
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish
@@ -6,7 +7,12 @@ import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import java.util.*
 
-class ESP8266Handler(private var id: String, private val mqtt: Mqtt3Client, private val database: Database) {
+class ESP8266Handler(
+    private var id: String,
+    private val mqtt: Mqtt3Client,
+    private val database: Database,
+    private val logger: ILogger
+) {
     private var status: Status = Status.INACTIVE
     private var mode: Mode = Mode.IDLE
     private var currentUid: ByteArray = ByteArray(0)
@@ -42,21 +48,20 @@ class ESP8266Handler(private var id: String, private val mqtt: Mqtt3Client, priv
             } else {
                 this.status = Status.INACTIVE
             }
-            println("Changed ${this.id} to ${this.status}")
+            this.logger.info { "Changed $id to $status" }
         }
     }
 
     private fun errorCallback(publish: Mqtt3Publish) {
         if (publish.payload.isPresent) {
-            println(String(publish.payloadAsBytes))
+            logger.error { String(publish.payloadAsBytes) }
         }
     }
 
     private fun writeOkCallback(publish: Mqtt3Publish) {
         if (publish.payload.isPresent) {
             if (publish.payloadAsBytes.contentEquals("true".toByteArray())) {
-                println("Data for ChipID ${this.id} was written successfully. Update DB")
-                println("NEW-DATA: ${this.currentData.toHexString()}")
+                logger.info { "Data for ChipID $id was written successfully. Update DB" }
                 database.update(Mifare1k) {
                     set(it.data, currentData)
                     where {
@@ -123,7 +128,7 @@ class ESP8266Handler(private var id: String, private val mqtt: Mqtt3Client, priv
         return array
     }
 
-    fun authenticate() {
+    private fun authenticate() {
         if (this.user == null) {
             return
         }
@@ -157,7 +162,7 @@ class ESP8266Handler(private var id: String, private val mqtt: Mqtt3Client, priv
         if (validUidContent.any { it }) {
             this.authenticate()
         } else {
-            println("No existing uid found in DB or Content is different")
+            logger.error { "No existing uid found in DB or Content is different" }
         }
     }
 
@@ -172,7 +177,7 @@ class ESP8266Handler(private var id: String, private val mqtt: Mqtt3Client, priv
                 onClick = {
                     user = it
                     mode = Mode.CHECKING
-                    println("Changed mode to CHECKING")
+                    logger.info { "Changed mode to CHECKING" }
                 }
             }
             button("auth-${id}") {
@@ -180,7 +185,7 @@ class ESP8266Handler(private var id: String, private val mqtt: Mqtt3Client, priv
                 onClick = {
                     user = it
                     mode = Mode.AUTHENTICATING
-                    println("Changed mode to AUTHENTICATING")
+                    logger.info { "Changed mode to AUTHENTICATING" }
                 }
             }
             button("stop-${id}") {
@@ -188,7 +193,7 @@ class ESP8266Handler(private var id: String, private val mqtt: Mqtt3Client, priv
                 onClick = {
                     user = it
                     mode = Mode.IDLE
-                    println("Changed mode to IDLE")
+                    logger.info { "Changed mode to IDLE" }
                 }
             }
         }
