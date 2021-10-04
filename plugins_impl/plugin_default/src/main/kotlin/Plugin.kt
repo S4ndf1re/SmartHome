@@ -54,21 +54,6 @@ class Plugin : IPlugin {
                 }
             }
         }, Container.create("Change Password") {
-            checkbox("cb1") {
-                text = "check me"
-                onOnState = {
-                    println("Me on ")
-                    status = true
-                }
-                onOffState = { user ->
-                    println("Me off ")
-                    println(user)
-                    status = false
-                }
-                getCurrent = {
-                    status
-                }
-            }
             textfield("old_pw") {
                 text = "Old Password"
                 update = { _, it ->
@@ -99,9 +84,10 @@ class Plugin : IPlugin {
                                 username = ""
                                 for (line in result) {
                                     username = line[User.name].toString()
+                                    password = line[User.password].toString()
                                     break
                                 }
-                                if (username != "") {
+                                if (username != "" && password == oldPassword) {
                                     database!!.update(User) {
                                         set(User.password, newPassword1)
                                         where {
@@ -112,7 +98,7 @@ class Plugin : IPlugin {
                             }
                         }
                     } catch (e: Exception) {
-
+                        println(e)
                     }
                 }
             }
