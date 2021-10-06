@@ -29,18 +29,14 @@ class ExtensionLoader<T> {
         val classLoader =
             URLClassLoader.newInstance(arrayOf(pluginsFile.toURI().toURL()), this::class.java.classLoader)
         for (classname in classnames) {
-            try {
+            kotlin.runCatching {
                 val clazz = Class.forName(classname, true, classLoader)
                 val extendedClass: Class<out T> = clazz.asSubclass(parent)
 
                 val constructor = extendedClass.getConstructor()
                 map[classname] = constructor.newInstance()
-            } catch (e: Exception) {
-                logger.error { e.message!! }
             }
         }
-
-
         return map
     }
 

@@ -4,6 +4,7 @@ import com.github.s4ndf1re.ILogger
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import org.ktorm.database.Database
 import java.io.File
+import java.util.*
 
 /**
  * PluginSystem defines the plugin system loader and usage.
@@ -41,6 +42,8 @@ class PluginSystem<T> {
                         name = dir.name,
                         pluginClassMap = classMap
                     )
+                }.onFailure {
+                    logger.error { it.toString() }
                 }
             }
             return system
@@ -65,8 +68,9 @@ class PluginSystem<T> {
      * @param key The name of the plugin
      * @return The Plugin, if found. Else null
      */
-    operator fun get(key: String): Plugin<T>? {
-        return this.pluginList[key]
+    operator fun get(key: String): Optional<Plugin<T>> = when (val temp = this.pluginList[key]) {
+        null -> Optional.empty()
+        else -> Optional.of(temp)
     }
 
     /**
@@ -74,8 +78,9 @@ class PluginSystem<T> {
      * @param key The name of the plugin
      * @return The plugin that got removed. If no plugin was removed, null is returned
      */
-    fun remove(key: String): Plugin<T>? {
-        return this.pluginList.remove(key)
+    fun remove(key: String): Optional<Plugin<T>> = when (val temp = this.pluginList.remove(key)) {
+        null -> Optional.empty()
+        else -> Optional.of(temp)
     }
 
     /**
