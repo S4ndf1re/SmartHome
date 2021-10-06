@@ -7,6 +7,7 @@ import nl.adaptivity.xmlutil.XmlDeclMode
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlElement
 import java.io.File
+import java.io.FileWriter
 
 /**
  * PluginDescriptor serves as the registration for a new Plugin
@@ -44,16 +45,16 @@ data class PluginDescriptor(
          * @param path The path from where to find the plugin.xml
          * @return A new, possibly default PluginDescriptor
          */
-        fun load(path: Path): PluginDescriptor? {
+        fun load(path: Path): Result<PluginDescriptor> {
             return try {
                 val file = File(path)
                 val xml = XML {
                     indentString = "    "
                     xmlDeclMode = XmlDeclMode.Minimal
                 }
-                xml.decodeFromString<PluginDescriptor>(file.readText())
+                Result.success(xml.decodeFromString<PluginDescriptor>(file.readText()))
             } catch (e: Exception) {
-                null
+                Result.failure(e)
             }
         }
     }
@@ -63,13 +64,10 @@ data class PluginDescriptor(
      * @param path The path from where to find the plugin.xml
      */
     fun save(path: Path) {
-        val file = File(path)
-
         val xml = XML {
             indentString = "    "
             xmlDeclMode = XmlDeclMode.Minimal
         }
-
-        file.writeText(xml.encodeToString(this))
+        FileWriter(path).use { it.write(xml.encodeToString(this)) }
     }
 }

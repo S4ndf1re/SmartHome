@@ -10,10 +10,15 @@ import sun.misc.Signal
 import java.util.*
 
 fun main() {
+    val logger = Logger("Backend System", LogLevel.DEBUG)
 
     val config = Config.loadConfig()
-    val system = PluginSystem.loadFromDir("plugins", PluginCreator())
-    val controllers = PluginSystem.loadFromDir("controller", ControllerCreator(system.pluginList.toMap()))
+    val system = PluginSystem.loadFromDir("plugins", PluginCreator(), logger.createNode("Plugin loading"))
+    val controllers = PluginSystem.loadFromDir(
+        "controller",
+        ControllerCreator(system.pluginList.toMap()),
+        logger.createNode("Controller Loader")
+    )
 
     try {
         val client = MqttClient.builder()
@@ -39,7 +44,6 @@ fun main() {
             password = config.sql.password
         )
 
-        val logger = Logger("Backend System", LogLevel.DEBUG)
 
         system.start(client, database, logger.createNode("Plugins"))
         controllers.start(client, database, logger.createNode("Controllers"))
