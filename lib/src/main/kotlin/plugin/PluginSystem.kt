@@ -1,5 +1,6 @@
 package plugin
 
+import com.github.s4ndf1re.ILogger
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import org.ktorm.database.Database
 import java.io.File
@@ -17,7 +18,7 @@ class PluginSystem<T> {
          * @param path The directory to load plugins from.
          * @return The complete and loaded PluginSystem
          */
-        inline fun <reified T> loadFromDir(path: Path, creator: PluginCreator<T>): PluginSystem<T> {
+        inline fun <reified T> loadFromDir(path: Path, creator: PluginCreator<T>, logger: ILogger): PluginSystem<T> {
             val system = PluginSystem<T>()
             val pluginDir = File(path)
             val dirs = pluginDir.listFiles() ?: return system
@@ -26,19 +27,21 @@ class PluginSystem<T> {
                 if (!dir.isDirectory) {
                     return system
                 }
-                val descriptor = PluginDescriptor.load(dir.path + File.separator + "plugin.xml") ?: continue
-                val loader = ExtensionLoader<T>()
-                val classMap = loader.loadFromDir(
-                    dir = dir.path + File.separator + descriptor.jarName,
-                    classnames = descriptor.pluginClass,
-                    parent = T::class.java
-                )
+                PluginDescriptor.load(dir.path + File.separator + "plugin.xml").onSuccess { descriptor ->
+                    val loader = ExtensionLoader<T>()
+                    val classMap = loader.loadFromDir(
+                        dir = dir.path + File.separator + descriptor.jarName,
+                        classnames = descriptor.pluginClass,
+                        parent = T::class.java,
+                        logger = logger
+                    )
 
-                system.pluginList[dir.name] = creator.create(
-                    descriptor = descriptor,
-                    name = dir.name,
-                    pluginClassMap = classMap
-                )
+                    system.pluginList[dir.name] = creator.create(
+                        descriptor = descriptor,
+                        name = dir.name,
+                        pluginClassMap = classMap
+                    )
+                }
             }
             return system
         }
@@ -80,9 +83,9 @@ class PluginSystem<T> {
      * @param client Defines the global MQTT client
      * @param database Defines the database
      */
-    fun start(client: Mqtt3Client, database: Database) {
-        for ((_, v) in this.pluginList) {
-            v.start(client, database)
+    fun start(client: Mqtt3Client, database: Database, logger: ILogger) {
+        for ((name, v) in this.pluginList) {
+            v.start(client, database, logger.createNode(name))
         }
     }
 

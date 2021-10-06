@@ -28,6 +28,7 @@ dependencies {
     implementation 'org.ktorm:ktorm-support-mysql:3.4.1'
     implementation 'mysql:mysql-connector-java:8.0.25'
     implementation 'io.ktor:ktor-websockets:1.6.2'
+    implementation 'com.github.S4ndf1re:Klog:master-SNAPSHOT'
 }
 
 compileKotlin {

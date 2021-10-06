@@ -1,3 +1,4 @@
+import com.github.s4ndf1re.ILogger
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import gui.Container
 import org.ktorm.database.Database
@@ -14,9 +15,11 @@ class Plugin : IPlugin {
     private var newPassword1 = ""
     private var newPassword2 = ""
     private var status = false
+    private var logger: ILogger? = null
 
-    override fun init(handler: Mqtt3Client, database: Database): Boolean {
+    override fun init(handler: Mqtt3Client, database: Database, logger: ILogger): Boolean {
         this.database = database
+        this.logger = logger
         return true
     }
 
@@ -53,21 +56,6 @@ class Plugin : IPlugin {
                 }
             }
         }, Container.create("Change Password") {
-            checkbox("cb1") {
-                text = "check me"
-                onOnState = {
-                    println("Me on ")
-                    status = true
-                }
-                onOffState = { user ->
-                    println("Me off ")
-                    println(user)
-                    status = false
-                }
-                getCurrent = {
-                    status
-                }
-            }
             textfield("old_pw") {
                 text = "Old Password"
                 update = { _, it ->
@@ -90,19 +78,27 @@ class Plugin : IPlugin {
                 text = "Change"
                 onClick = {
                     try {
+                        logger?.debug { "Database is null?: ${database == null}" }
                         if (database != null) {
-                            if (newPassword1 == newPassword2) {
+                            if (newPassword1.trim() == newPassword2.trim()) {
                                 val result = database!!.from(User).select().where {
                                     User.name eq it
                                 }
                                 username = ""
+                                password = ""
                                 for (line in result) {
-                                    username = line[User.name].toString()
+                                    username = line[User.name].toString().trim()
+                                    password = line[User.password].toString().trim()
                                     break
                                 }
-                                if (username != "") {
+                                logger?.debug { "Username: $username" }
+                                logger?.debug { "OldPassword: $oldPassword" }
+                                logger?.debug { "Password: $password" }
+                                logger?.debug { "New1: $newPassword1" }
+                                logger?.debug { "New2: $newPassword2" }
+                                if (username != "" && password == oldPassword) {
                                     database!!.update(User) {
-                                        set(User.password, newPassword1)
+                                        set(User.password, newPassword1.trim())
                                         where {
                                             it.name eq username
                                         }
@@ -111,7 +107,7 @@ class Plugin : IPlugin {
                             }
                         }
                     } catch (e: Exception) {
-
+                        println(e)
                     }
                 }
             }

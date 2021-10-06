@@ -56,6 +56,7 @@ class Gui() {
                     // subclass(Form::class)
                     // subclass(Image::class)
                     subclass(TextField::class)
+                    subclass(Alert::class)
                 }
             }
         }

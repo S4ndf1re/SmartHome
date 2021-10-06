@@ -1,5 +1,6 @@
 package plugin.implementations.controller
 
+import com.github.s4ndf1re.ILogger
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import org.ktorm.database.Database
 import plugin.Plugin
@@ -15,7 +16,12 @@ interface IController {
      * @param handler A handler to a already initialized Mqtt5Client
      * @return True if successful, false otherwise
      */
-    fun init(handler: Mqtt3Client, database: Database, pluginList: Map<String, Plugin<IPlugin>>): Boolean
+    fun init(
+        handler: Mqtt3Client,
+        database: Database,
+        pluginList: Map<String, Plugin<IPlugin>>,
+        logger: ILogger
+    ): Boolean
 
 
     /**

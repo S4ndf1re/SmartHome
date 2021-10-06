@@ -1,5 +1,6 @@
 package plugin.implementations.plugin
 
+import com.github.s4ndf1re.ILogger
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import org.ktorm.database.Database
 import plugin.Plugin
@@ -10,21 +11,22 @@ class PluginImpl(
     override val descriptor: PluginDescriptor,
     override val pluginClassMap: Map<String, IPlugin>,
 ) : Plugin<IPlugin>() {
+    private var logger: ILogger? = null
 
-
-    override fun start(client: Mqtt3Client, database: Database) {
+    override fun start(client: Mqtt3Client, database: Database, logger: ILogger) {
         for ((name, v) in this.pluginClassMap) {
-            println("Starting $name")
-            v.init(client, database)
-            println("Done")
+            logger.info { "Starting $name" }
+            v.init(client, database, logger.createNode(name))
+            logger.info { "Done" }
         }
+        this.logger = logger
     }
 
     override fun stop() {
         for ((name, v) in this.pluginClassMap) {
-            println("Stopping $name")
+            this.logger?.info { "Stopping $name" }
             v.close()
-            println("Done")
+            this.logger?.info { "Done" }
         }
     }
 

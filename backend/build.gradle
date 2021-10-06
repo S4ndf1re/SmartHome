@@ -3,8 +3,13 @@ plugins {
     id 'application'
     id "org.jetbrains.dokka"
     id 'org.jetbrains.kotlin.plugin.serialization'
+    id 'org.openjfx.javafxplugin' version '0.0.8'
 }
 
+javafx {
+    version = "11.0.2"
+    modules = ['javafx.controls', 'javafx.graphics']
+}
 
 repositories {
     mavenCentral()
@@ -24,6 +29,8 @@ dependencies {
     implementation 'org.ktorm:ktorm-core:3.4.1'
     implementation 'org.ktorm:ktorm-support-mysql:3.4.1'
     implementation 'mysql:mysql-connector-java:8.0.25'
+    implementation 'no.tornado:tornadofx:1.7.20'
+    implementation 'com.github.S4ndf1re:Klog:master-SNAPSHOT'
 }
 
 application {

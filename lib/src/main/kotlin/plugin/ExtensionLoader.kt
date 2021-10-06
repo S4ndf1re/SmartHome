@@ -1,5 +1,6 @@
 package plugin
 
+import com.github.s4ndf1re.ILogger
 import java.io.File
 import java.net.URLClassLoader
 
@@ -17,7 +18,12 @@ class ExtensionLoader<T> {
      * @param parent The parent class to inherit from
      * @return A mutable list of type T objects
      */
-    fun loadFromDir(dir: Path, classnames: ArrayList<String>, parent: Class<T>): MutableMap<String, T> {
+    fun loadFromDir(
+        dir: Path,
+        classnames: ArrayList<String>,
+        parent: Class<T>,
+        logger: ILogger
+    ): MutableMap<String, T> {
         val map = mutableMapOf<String, T>()
         val pluginsFile = File(dir)
         val classLoader =
@@ -30,8 +36,7 @@ class ExtensionLoader<T> {
                 val constructor = extendedClass.getConstructor()
                 map[classname] = constructor.newInstance()
             } catch (e: Exception) {
-                e.printStackTrace()
-                // Just continue, because the class does not exist
+                logger.error { e.message!! }
             }
         }
 

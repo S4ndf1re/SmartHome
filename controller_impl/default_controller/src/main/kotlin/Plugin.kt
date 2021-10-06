@@ -1,3 +1,4 @@
+import com.github.s4ndf1re.ILogger
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import gui.Child
 import gui.Gui
@@ -119,7 +120,12 @@ class Plugin : IController {
         }
     }
 
-    override fun init(handler: Mqtt3Client, database: Database, pluginList: Map<String, Plugin<IPlugin>>): Boolean {
+    override fun init(
+        handler: Mqtt3Client,
+        database: Database,
+        pluginList: Map<String, Plugin<IPlugin>>,
+        logger: ILogger
+    ): Boolean {
         this.pluginList = pluginList
 
         this.server = embeddedServer(Netty, port = 1337) {

@@ -1,5 +1,6 @@
 package plugin.implementations.plugin
 
+import com.github.s4ndf1re.ILogger
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import gui.Container
 import org.ktorm.database.Database
@@ -15,7 +16,7 @@ interface IPlugin {
      * @param handler A handler to a already initialized Mqtt5Client
      * @return True if successful, false otherwise
      */
-    fun init(handler: Mqtt3Client, database: Database): Boolean
+    fun init(handler: Mqtt3Client, database: Database, logger: ILogger): Boolean
 
     /**
      * getContainer will return a gui container, that serves as a widget in the later front end
