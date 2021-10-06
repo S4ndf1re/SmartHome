@@ -5,21 +5,21 @@ import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import plugin.implementations.plugin.IPlugin
 import structures.User
+import java.util.*
 
 class Plugin : IPlugin {
 
-    private var database: Database? = null
+    private var database: Optional<Database> = Optional.empty()
     private var username = ""
     private var password = ""
     private var oldPassword = ""
     private var newPassword1 = ""
     private var newPassword2 = ""
-    private var status = false
-    private var logger: ILogger? = null
+    private var logger: Optional<ILogger> = Optional.empty()
 
     override fun init(handler: Mqtt3Client, database: Database, logger: ILogger): Boolean {
-        this.database = database
-        this.logger = logger
+        this.database = Optional.of(database)
+        this.logger = Optional.of(logger)
         return true
     }
 
@@ -43,19 +43,22 @@ class Plugin : IPlugin {
             button("submit_add") {
                 text = "Add"
                 onClick = {
-                    try {
-                        if (database != null) {
-                            database!!.insert(User) {
+                    kotlin.runCatching {
+                        database.ifPresent { db ->
+                            db.insert(User) {
                                 set(it.name, username)
                                 set(it.password, password)
                             }
                         }
-                    } catch (e: java.lang.Exception) {
-                        println("Failed")
+                    }.onFailure { exception ->
+                        logger.ifPresent { log ->
+                            log.error { exception.toString() }
+                        }
                     }
                 }
             }
-        }, Container.create("Change Password") {
+        }, Container.create("Change Password")
+        {
             textfield("old_pw") {
                 text = "Old Password"
                 update = { _, it ->
@@ -77,11 +80,10 @@ class Plugin : IPlugin {
             button("submit_change") {
                 text = "Change"
                 onClick = {
-                    try {
-                        logger?.debug { "Database is null?: ${database == null}" }
-                        if (database != null) {
+                    kotlin.runCatching {
+                        database.ifPresent { db ->
                             if (newPassword1.trim() == newPassword2.trim()) {
-                                val result = database!!.from(User).select().where {
+                                val result = db.from(User).select().where {
                                     User.name eq it
                                 }
                                 username = ""
@@ -91,13 +93,8 @@ class Plugin : IPlugin {
                                     password = line[User.password].toString().trim()
                                     break
                                 }
-                                logger?.debug { "Username: $username" }
-                                logger?.debug { "OldPassword: $oldPassword" }
-                                logger?.debug { "Password: $password" }
-                                logger?.debug { "New1: $newPassword1" }
-                                logger?.debug { "New2: $newPassword2" }
                                 if (username != "" && password == oldPassword) {
-                                    database!!.update(User) {
+                                    db.update(User) {
                                         set(User.password, newPassword1.trim())
                                         where {
                                             it.name eq username
@@ -106,8 +103,10 @@ class Plugin : IPlugin {
                                 }
                             }
                         }
-                    } catch (e: Exception) {
-                        println(e)
+                    }.onFailure { exception ->
+                        logger.ifPresent { log ->
+                            log.error { exception.toString() }
+                        }
                     }
                 }
             }
