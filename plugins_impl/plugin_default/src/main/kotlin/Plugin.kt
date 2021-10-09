@@ -1,6 +1,8 @@
 import com.github.s4ndf1re.ILogger
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
+import gui.Alert
 import gui.Container
+import gui.Data
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import plugin.implementations.plugin.IPlugin
@@ -15,6 +17,7 @@ class Plugin : IPlugin {
     private var newPassword1 = ""
     private var newPassword2 = ""
     private var logger: ILogger? = null
+    private var data: Data? = null
 
     override fun init(handler: Mqtt3Client, database: Database, logger: ILogger): Boolean {
         this.database = database
@@ -101,6 +104,17 @@ class Plugin : IPlugin {
                     }.onFailure { exception ->
                         logger?.error { exception.toString() }
                     }
+                }
+            }
+        }, Container.create("test_default") {
+            data = data("test_data") {
+                this.data = Alert("some_alert", "")
+            }
+            button("button1") {
+                this.text = "Test"
+                this.onClick = {
+                    data?.update(Alert("some_alert", it))
+                    println(it)
                 }
             }
         })

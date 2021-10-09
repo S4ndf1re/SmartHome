@@ -12,7 +12,9 @@ class Data extends React.Component {
         this.state = {
             name: props.name,
             ws: null,
-            child: null
+            child: null,
+            updateRequest: props.updateRequest,
+            updateSocket: props.updateSocket
         }
     }
 
@@ -55,6 +57,7 @@ class Data extends React.Component {
         };
 
         ws.onmessage = (msg) => {
+            this.setState({child: null})
             this.setState({child: JSON.parse(msg.data)})
         }
     };

@@ -2,6 +2,7 @@ import Button from "./Button";
 import Checkbox from "./Checkbox";
 import TextField from "./TextField";
 import Data from "./Data";
+import Alert from "./Alert";
 
 function getComponentForType(state) {
     if (state.type === "gui.Button") {
@@ -18,6 +19,8 @@ function getComponentForType(state) {
     } else if (state.type === "gui.Data") {
         return <Data key={state.name} name={state.name} updateRequest={state.updateRequest}
                      updateSocket={state.updateSocket}/>
+    } else if (state.type === "gui.Alert") {
+        return <Alert key={state.name} name={state.name} message={state.message}/>
     }
 }
 

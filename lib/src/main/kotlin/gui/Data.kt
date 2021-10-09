@@ -1,5 +1,6 @@
 package gui
 
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -34,8 +35,8 @@ class Data(override var name: String) : Child {
     fun update(data: Child) {
         this.data = data
         for (updateFunction in updateFunctions) {
-            suspend {
-                kotlin.runCatching { // Keeping programm flow alive on exception
+            kotlin.runCatching { // Keeping programm flow alive on exception
+                runBlocking {
                     updateFunction(data)
                 }
             }
