@@ -25,7 +25,6 @@ import plugin.Plugin
 import plugin.implementations.controller.IController
 import plugin.implementations.plugin.IPlugin
 import structures.User
-import java.util.*
 import java.util.concurrent.TimeUnit
 
 @Serializable
@@ -34,7 +33,7 @@ data class TextInputData(val text: String)
 class Plugin : IController {
     private var pluginList: Map<String, Plugin<IPlugin>> = mapOf()
     private var gui: Gui = Gui.create { }
-    private var server: Optional<NettyApplicationEngine> = Optional.empty()
+    private var server: NettyApplicationEngine? = null
 
     private fun configureOnOffState(routing: Route, child: Child, key: String, name: String) {
         if (child is gui.OnOffState) {
@@ -111,7 +110,7 @@ class Plugin : IController {
             }
             routing.get(child.updateRequest) {
                 val json = Gui.getJsonDefault()
-                child.getState().ifPresent {
+                child.getState()?.let {
                     suspend {
                         val jsonString = json.encodeToString(it)
                         call.respondText { jsonString }
@@ -129,7 +128,7 @@ class Plugin : IController {
     ): Boolean {
         this.pluginList = pluginList
 
-        this.server = Optional.of(embeddedServer(Netty, port = 1337) {
+        this.server = embeddedServer(Netty, port = 1337) {
             install(CORS) {
                 header(HttpHeaders.AccessControlAllowHeaders)
                 header(HttpHeaders.AccessControlAllowOrigin)
@@ -181,14 +180,12 @@ class Plugin : IController {
                     }
                 }
             }
-        }.start(wait = false))
+        }.start(wait = false)
 
         return true
     }
 
     override fun close() {
-        this.server.ifPresent { srv ->
-            srv.stop(gracePeriod = 10, timeout = 10, timeUnit = TimeUnit.SECONDS)
-        }
+        this.server?.stop(gracePeriod = 10, timeout = 10, timeUnit = TimeUnit.SECONDS)
     }
 }

@@ -35,6 +35,8 @@ class ExtensionLoader<T> {
 
                 val constructor = extendedClass.getConstructor()
                 map[classname] = constructor.newInstance()
+            }.onFailure {
+                logger.error { it.toString() }
             }
         }
         return map

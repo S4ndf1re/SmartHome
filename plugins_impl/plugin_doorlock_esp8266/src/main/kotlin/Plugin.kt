@@ -4,21 +4,20 @@ import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish
 import gui.Container
 import org.ktorm.database.Database
 import plugin.implementations.plugin.IPlugin
-import java.util.*
 
 class Plugin : IPlugin {
 
-    private var handler: Optional<Mqtt3Client> = Optional.empty()
+    private var handler: Mqtt3Client? = null
     private var handlers: MutableMap<String, ESP8266Handler> = mutableMapOf()
-    private var database: Optional<Database> = Optional.empty()
-    private var logger: Optional<ILogger> = Optional.empty()
+    private var database: Database? = null
+    private var logger: ILogger? = null
 
     override fun init(handler: Mqtt3Client, database: Database, logger: ILogger): Boolean {
         handler.toAsync().subscribeWith().topicFilter("doorlock/+/status").callback { pub -> this.statusHandler(pub) }
             .send().join()
-        this.handler = Optional.of(handler)
-        this.database = Optional.of(database)
-        this.logger = Optional.of(logger)
+        this.handler = handler
+        this.database = database
+        this.logger = logger
         return true
     }
 
@@ -30,16 +29,14 @@ class Plugin : IPlugin {
         handlers.forEach {
             it.value.close()
         }
-        handler.ifPresent { hndl ->
-            hndl.toAsync().unsubscribeWith().topicFilter("doorlock/+/status").send().join()
-        }
+        handler?.toAsync()?.unsubscribeWith()?.topicFilter("doorlock/+/status")?.send()?.join()
     }
 
     private fun statusHandler(publish: Mqtt3Publish) {
         val id = publish.topic.levels[1]
-        handler.ifPresent { hndl ->
-            database.ifPresent { db ->
-                logger.ifPresent { log ->
+        handler?.let { hndl ->
+            database?.let { db ->
+                logger?.let { log ->
                     if (!handlers.containsKey(id)) {
                         log.info { "Found id: $id" }
                         log.info { "Inserted $id to list" }

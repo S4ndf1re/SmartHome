@@ -5,21 +5,20 @@ import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import plugin.implementations.plugin.IPlugin
 import structures.User
-import java.util.*
 
 class Plugin : IPlugin {
 
-    private var database: Optional<Database> = Optional.empty()
+    private var database: Database? = null
     private var username = ""
     private var password = ""
     private var oldPassword = ""
     private var newPassword1 = ""
     private var newPassword2 = ""
-    private var logger: Optional<ILogger> = Optional.empty()
+    private var logger: ILogger? = null
 
     override fun init(handler: Mqtt3Client, database: Database, logger: ILogger): Boolean {
-        this.database = Optional.of(database)
-        this.logger = Optional.of(logger)
+        this.database = database
+        this.logger = logger
         return true
     }
 
@@ -44,16 +43,12 @@ class Plugin : IPlugin {
                 text = "Add"
                 onClick = {
                     kotlin.runCatching {
-                        database.ifPresent { db ->
-                            db.insert(User) {
-                                set(it.name, username)
-                                set(it.password, password)
-                            }
+                        database?.insert(User) {
+                            set(it.name, username)
+                            set(it.password, password)
                         }
                     }.onFailure { exception ->
-                        logger.ifPresent { log ->
-                            log.error { exception.toString() }
-                        }
+                        logger?.error { exception.toString() }
                     }
                 }
             }
@@ -81,7 +76,7 @@ class Plugin : IPlugin {
                 text = "Change"
                 onClick = {
                     kotlin.runCatching {
-                        database.ifPresent { db ->
+                        database?.let { db ->
                             if (newPassword1.trim() == newPassword2.trim()) {
                                 val result = db.from(User).select().where {
                                     User.name eq it
@@ -104,9 +99,7 @@ class Plugin : IPlugin {
                             }
                         }
                     }.onFailure { exception ->
-                        logger.ifPresent { log ->
-                            log.error { exception.toString() }
-                        }
+                        logger?.error { exception.toString() }
                     }
                 }
             }

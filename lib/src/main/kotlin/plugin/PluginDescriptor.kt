@@ -6,7 +6,7 @@ import kotlinx.serialization.encodeToString
 import nl.adaptivity.xmlutil.XmlDeclMode
 import nl.adaptivity.xmlutil.serialization.XML
 import nl.adaptivity.xmlutil.serialization.XmlElement
-import java.io.File
+import java.io.FileReader
 import java.io.FileWriter
 
 /**
@@ -47,12 +47,13 @@ data class PluginDescriptor(
          */
         fun load(path: Path): Result<PluginDescriptor> {
             return try {
-                val file = File(path)
-                val xml = XML {
-                    indentString = "    "
-                    xmlDeclMode = XmlDeclMode.Minimal
+                FileReader(path).use { file ->
+                    val xml = XML {
+                        indentString = "    "
+                        xmlDeclMode = XmlDeclMode.Minimal
+                    }
+                    Result.success(xml.decodeFromString(file.readText()))
                 }
-                Result.success(xml.decodeFromString<PluginDescriptor>(file.readText()))
             } catch (e: Exception) {
                 Result.failure(e)
             }

@@ -18,7 +18,7 @@ class ESP8266Handler(
     private var currentUid: ByteArray = ByteArray(0)
     private var currentData: ByteArray = ByteArray(0)
     private var dataCount = 0
-    private var user: Optional<String> = Optional.empty()
+    private var user: String? = null
 
     init {
         mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/status").qos(MqttQos.EXACTLY_ONCE)
@@ -117,7 +117,7 @@ class ESP8266Handler(
         database.insert(Mifare1k) {
             set(it.uid, currentUid)
             set(it.data, "".toByteArray())
-            user.ifPresent { usr -> set(it.username, usr) }
+            user?.let { usr -> set(it.username, usr) }
         }
     }
 
@@ -129,7 +129,7 @@ class ESP8266Handler(
     }
 
     private fun authenticate() {
-        if (this.user.isEmpty) {
+        if (this.user == null) {
             return
         }
 
@@ -175,7 +175,7 @@ class ESP8266Handler(
             button("check-${id}") {
                 text = "Check"
                 onClick = {
-                    user = Optional.of(it)
+                    user = it
                     mode = Mode.CHECKING
                     logger.info { "Changed mode to CHECKING" }
                 }
@@ -183,7 +183,7 @@ class ESP8266Handler(
             button("auth-${id}") {
                 text = "Authenticate"
                 onClick = {
-                    user = Optional.of(it)
+                    user = it
                     mode = Mode.AUTHENTICATING
                     logger.info { "Changed mode to AUTHENTICATING" }
                 }
@@ -191,7 +191,7 @@ class ESP8266Handler(
             button("stop-${id}") {
                 text = "Stop"
                 onClick = {
-                    user = Optional.of(it)
+                    user = it
                     mode = Mode.IDLE
                     logger.info { "Changed mode to IDLE" }
                 }

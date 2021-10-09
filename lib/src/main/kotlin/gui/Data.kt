@@ -2,7 +2,6 @@ package gui
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
-import java.util.*
 
 @Serializable
 class Data(override var name: String) : Child {
@@ -16,7 +15,7 @@ class Data(override var name: String) : Child {
      * [data] contains the current [Child]
      */
     @Transient
-    var data: Optional<Child> = Optional.empty()
+    var data: Child? = null
 
     /**
      * [updateRequest] describes the path, that any protocol must call, in order to receive the current [data]
@@ -33,13 +32,11 @@ class Data(override var name: String) : Child {
      * @param [data] the new data that will get set internally.
      */
     fun update(data: Child) {
-        this.data = Optional.of(data)
+        this.data = data
         for (updateFunction in updateFunctions) {
             suspend {
-                try {
+                kotlin.runCatching { // Keeping programm flow alive on exception
                     updateFunction(data)
-                } catch (exception: Exception) {
-                    // Keep Program flow alive
                 }
             }
         }
@@ -65,7 +62,7 @@ class Data(override var name: String) : Child {
      * [getState] will return the current [data]
      * @return The current data as a [Child]
      */
-    fun getState(): Optional<Child> {
+    fun getState(): Child? {
         return this.data
     }
 }
