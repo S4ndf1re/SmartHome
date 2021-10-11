@@ -11,6 +11,7 @@ class ComponentPage extends React.Component {
         this.state = {
             name: props.name,
             list: props.data,
+            onInitRequest: props.onInitRequest
         }
         this.components = []
         this.updateList()
@@ -24,6 +25,10 @@ class ComponentPage extends React.Component {
 
     componentDidMount() {
         this.updateList()
+        window.fetch("http://" + window.location.hostname + ":1337/" + this.state.onInitRequest, {
+                credentials: "include"
+            }
+        ).catch(err => console.log(err))
     }
 
     render() {
