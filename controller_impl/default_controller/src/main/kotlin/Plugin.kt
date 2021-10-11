@@ -1,6 +1,7 @@
 import com.github.s4ndf1re.ILogger
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import gui.Child
+import gui.Container
 import gui.Gui
 import io.ktor.application.*
 import io.ktor.auth.*
@@ -34,6 +35,14 @@ class Plugin : IController {
     private var pluginList: Map<String, Plugin<IPlugin>> = mapOf()
     private var gui: Gui = Gui.create { }
     private var server: NettyApplicationEngine? = null
+
+    private fun configureContainer(routing: Route, container: Container, key: String, name: String) {
+        container.onInitRequest = "$key/$name/container/init"
+        routing.get(container.onInitRequest) {
+            val username = call.principal<UserIdPrincipal>()!!.name
+            container.onInit(username)
+        }
+    }
 
     private fun configureOnOffState(routing: Route, child: Child, key: String, name: String) {
         if (child is gui.OnOffState) {
@@ -90,27 +99,29 @@ class Plugin : IController {
             child.updateRequest = "$key/$name/${child.name}/request".lowercase()
             child.updateSocket = "$key/$name/${child.name}/socket".lowercase()
             routing.webSocket(child.updateSocket) {
+                val username = call.principal<UserIdPrincipal>()!!.name
                 val updateFunction: suspend (Child) -> Unit = { element ->
                     val json = Gui.getJsonDefault()
                     val jsonString = json.encodeToString(element)
                     outgoing.send(Frame.Text(jsonString))
                 }
-                child.registerUpdateFunction(updateFunction)
+                child.registerUpdateFunction(username, updateFunction)
 
                 for (frame in incoming) {
                     when (frame) {
                         is Frame.Close -> {
-                            child.unregisterUpdateFunction(updateFunction)
+                            child.unregisterUpdateFunction(username, updateFunction)
                         }
                         else -> {
-                            // Do nothing. We are not expecting to receive any data
+                            // Do nothing
                         }
                     }
                 }
             }
             routing.get(child.updateRequest) {
+                val username = call.principal<UserIdPrincipal>()!!.name
                 val json = Gui.getJsonDefault()
-                child.getState()?.let {
+                child.getState(username)?.let {
                     suspend {
                         val jsonString = json.encodeToString(it)
                         call.respondText { jsonString }
@@ -163,6 +174,7 @@ class Plugin : IController {
                         value.pluginClassMap.forEach { (name, plugin) ->
                             val containers = plugin.getContainers()
                             containers.forEach {
+                                configureContainer(this, it, name, name)
                                 gui.add(it)
                                 it.list.forEach { child ->
                                     configureClickable(this, child, key, name)

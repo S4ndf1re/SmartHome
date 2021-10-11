@@ -2,7 +2,9 @@ import com.github.s4ndf1re.ILogger
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import com.hivemq.client.mqtt.mqtt3.Mqtt3Client
 import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish
+import gui.Alert
 import gui.Container
+import gui.Data
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import java.util.*
@@ -19,6 +21,7 @@ class ESP8266Handler(
     private var currentData: ByteArray = ByteArray(0)
     private var dataCount = 0
     private var user: String? = null
+    private var data: Data? = null
 
     init {
         mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/status").qos(MqttQos.EXACTLY_ONCE)
@@ -147,17 +150,11 @@ class ESP8266Handler(
         mqtt.toAsync().publishWith().topic("doorlock/${this.id}/write/data").payload(payload).send().join()
     }
 
-    private fun ByteArray.toHexString(): String {
-        return this.joinToString("") {
-            java.lang.String.format("%02x", it)
-        }
-    }
-
     private fun check() {
         val validUidContent = database.from(Mifare1k).select().where {
             Mifare1k.uid eq this.currentUid
-        }.map {
-            it[Mifare1k.data].contentEquals(this.currentData)
+        }.map { row ->
+            row[Mifare1k.data].contentEquals(this.currentData)
         }
         if (validUidContent.any { it }) {
             this.authenticate()
@@ -177,7 +174,7 @@ class ESP8266Handler(
                 onClick = {
                     user = it
                     mode = Mode.CHECKING
-                    logger.info { "Changed mode to CHECKING" }
+                    data?.update(it, Alert("alert-$id", "Changed mode to ${Mode.CHECKING}"))
                 }
             }
             button("auth-${id}") {
@@ -185,7 +182,7 @@ class ESP8266Handler(
                 onClick = {
                     user = it
                     mode = Mode.AUTHENTICATING
-                    logger.info { "Changed mode to AUTHENTICATING" }
+                    data?.update(it, Alert("alert-$id", "Changed mode to ${Mode.AUTHENTICATING}"))
                 }
             }
             button("stop-${id}") {
@@ -193,8 +190,13 @@ class ESP8266Handler(
                 onClick = {
                     user = it
                     mode = Mode.IDLE
-                    logger.info { "Changed mode to IDLE" }
+                    data?.update(it, Alert("alert-$id", "Changed mode to ${Mode.IDLE}"))
                 }
+            }
+            data = data("data-${id}") {}
+
+            onInit = { user ->
+                data?.update(user, Alert("alert-$id", ""))
             }
         }
     }

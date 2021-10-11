@@ -1,6 +1,7 @@
 package gui
 
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.Transient
 
 @Serializable
 /**
@@ -11,6 +12,13 @@ class Container(override var name: String) : Child, Widget {
      * [list] holds all [Child]ren that will get displayed by the [Widget].
      */
     override var list: MutableList<Child> = mutableListOf()
+
+    /**
+     * [onInit] will get called every time a container gets displayed
+     */
+    @Transient
+    var onInit: (String) -> Unit = {}
+    var onInitRequest: String = ""
 
     companion object Factory {
         /**
