@@ -1,6 +1,7 @@
 package gui
 
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.Transient
 
@@ -18,6 +19,9 @@ class Data(override var name: String) : Child {
     @Transient
     var data: MutableMap<String, Child> = mutableMapOf()
 
+    @Transient
+    var mutex = Mutex()
+
     /**
      * [updateRequest] describes the path, that any protocol must call, in order to receive the current [data]
      */
@@ -32,12 +36,12 @@ class Data(override var name: String) : Child {
      * [update] should get called, everytime the containing [data] should change and all [updateFunctions] should get called.
      * @param [data] the new data that will get set internally.
      */
-    fun update(user: String, data: Child) {
-        this.data[user] = data
-        this.updateFunctions[user]?.let { functions ->
-            for (updateFunction in functions) {
-                kotlin.runCatching { // Keeping programm flow alive on exception
-                    runBlocking {
+    suspend fun update(user: String, data: Child) {
+        this.mutex.withLock {
+            this.data[user] = data
+            this.updateFunctions[user]?.let { functions ->
+                for (updateFunction in functions) {
+                    kotlin.runCatching { // Keeping programm flow alive on exception
                         updateFunction(data)
                     }
                 }
@@ -50,11 +54,13 @@ class Data(override var name: String) : Child {
      * @param [user]
      * @param [newUpdateFunction]
      */
-    fun registerUpdateFunction(user: String, newUpdateFunction: suspend (Child) -> Unit) {
-        if (this.updateFunctions[user] != null) {
-            this.updateFunctions[user]!!.add(newUpdateFunction)
-        } else {
-            this.updateFunctions[user] = mutableListOf(newUpdateFunction)
+    suspend fun registerUpdateFunction(user: String, newUpdateFunction: suspend (Child) -> Unit) {
+        this.mutex.withLock {
+            if (this.updateFunctions[user] != null) {
+                this.updateFunctions[user]!!.add(newUpdateFunction)
+            } else {
+                this.updateFunctions[user] = mutableListOf(newUpdateFunction)
+            }
         }
     }
 
@@ -62,15 +68,19 @@ class Data(override var name: String) : Child {
      * [unregisterUpdateFunction] removes an already registered function from [updateFunctions]
      * @param [existingUpdateFunction] must exist with the same reference in [updateFunctions] to get removed.
      */
-    fun unregisterUpdateFunction(user: String, existingUpdateFunction: suspend (Child) -> Unit) {
-        this.updateFunctions[user]?.remove(existingUpdateFunction)
+    suspend fun unregisterUpdateFunction(user: String, existingUpdateFunction: suspend (Child) -> Unit) {
+        this.mutex.withLock {
+            this.updateFunctions[user]?.remove(existingUpdateFunction)
+        }
     }
 
     /**
      * [getState] will return the current [data]
      * @return The current data as a [Child]
      */
-    fun getState(user: String): Child? {
-        return this.data[user]
+    suspend fun getState(user: String): Child? {
+        this.mutex.withLock {
+            return this.data[user]
+        }
     }
 }

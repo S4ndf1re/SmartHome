@@ -8,7 +8,7 @@ interface TextInput {
     /**
      * [update] is the function that will get called at text input from the frontend.
      */
-    var update: (userId: String, text: String) -> Unit
+    var update: suspend (userId: String, text: String) -> Unit
 
     /**
      * [updateRequest] is the path, that any protocol has to call, in order to execute [update]

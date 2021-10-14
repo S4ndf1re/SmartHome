@@ -10,7 +10,7 @@ class CreateUser(private val db: Database) {
     private var newPassword = mutableMapOf<String, String>()
     private var data: Data? = null
 
-    private fun createUser(user: String) {
+    private suspend fun createUser(user: String) {
         kotlin.runCatching {
             if (newUsername[user] == null) {
                 throw Exception("Username is empty. Please fill the field Username.")

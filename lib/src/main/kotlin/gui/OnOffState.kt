@@ -24,17 +24,17 @@ interface OnOffState {
      * [onOnState] defines the function that will get called everytime the state of the checkbox is set to 'ON'.
      * By default, this function will set the internal state to 'true'.
      */
-    var onOnState: (userId: String) -> Unit
+    var onOnState: suspend (userId: String) -> Unit
 
     /**
      * [onOffState] defines the function that will get called everytime the state of the checkbox is set to 'OFF'.
      * By default, this function will set the internal state to 'false'.
      */
-    var onOffState: (userId: String) -> Unit
+    var onOffState: suspend (userId: String) -> Unit
 
     /**
      * [getCurrent] will get called everytime the current state must be fetched.
      * By default, it will return its internal state.
      */
-    var getCurrent: (userId: String) -> Boolean
+    var getCurrent: suspend (userId: String) -> Boolean
 }

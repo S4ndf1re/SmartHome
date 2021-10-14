@@ -13,6 +13,6 @@ class TextField(override var name: String) : Child, Textable, TextInput {
     override var updateRequest: String = ""
 
     @Transient
-    override var update: (userId: String, text: String) -> Unit = { _: String, _: String -> }
+    override var update: suspend (userId: String, text: String) -> Unit = { _: String, _: String -> }
 
 }

@@ -15,5 +15,5 @@ class Button(override var name: String) : Child, Clickable, Textable {
     override var text: String = ""
 
     @Transient
-    override var onClick: (userId: String) -> Unit = {}
+    override var onClick: suspend (userId: String) -> Unit = {}
 }
