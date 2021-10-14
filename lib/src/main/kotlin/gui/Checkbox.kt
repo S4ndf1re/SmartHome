@@ -15,13 +15,13 @@ class Checkbox(override var name: String) : Child, Textable, OnOffState {
     override var onGetStateRequest: String = ""
 
     @Transient
-    override var getCurrent: (userId: String) -> Boolean = { this.state }
+    override var getCurrent: suspend (userId: String) -> Boolean = { this.state }
 
     @Transient
-    override var onOnState: (userId: String) -> Unit = { this.state = true }
+    override var onOnState: suspend (userId: String) -> Unit = { this.state = true }
 
     @Transient
-    override var onOffState: (userId: String) -> Unit = { this.state = false }
+    override var onOffState: suspend (userId: String) -> Unit = { this.state = false }
 
     /**
      * [state] describes the internal state of [Checkbox].

@@ -17,7 +17,7 @@ class Container(override var name: String) : Child, Widget {
      * [onInit] will get called every time a container gets displayed
      */
     @Transient
-    var onInit: (String) -> Unit = {}
+    var onInit: suspend (String) -> Unit = {}
     var onInitRequest: String = ""
 
     companion object Factory {

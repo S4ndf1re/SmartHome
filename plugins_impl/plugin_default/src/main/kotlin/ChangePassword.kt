@@ -12,7 +12,7 @@ class ChangePassword(private val db: Database) {
     private var data: Data? = null
 
 
-    private fun changePW(user: String) {
+    private suspend fun changePW(user: String) {
         kotlin.runCatching {
             if (oldPassword[user] == null) {
                 throw Exception("Old password is not supplied.")
