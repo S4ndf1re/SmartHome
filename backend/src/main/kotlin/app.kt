@@ -76,11 +76,10 @@ fun main() {
             println()
         }
 
-        shutdown()
-
     } catch (e: Exception) {
-
         e.printStackTrace()
+        system.stop()
+        controllers.stop()
     }
 
     config.save()
