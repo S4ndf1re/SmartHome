@@ -64,7 +64,7 @@ class CreateUser(private val db: Database) {
             data = data("alert_create_data") {}
 
             onInit = { user ->
-                data?.apply { this.data[user] = Alert("alert_create", "") }
+                data?.update(user, Alert("alert_create", ""))
             }
         }
     }
