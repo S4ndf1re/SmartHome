@@ -21,7 +21,9 @@ class Data extends React.Component {
     componentDidMount() {
         this.connect()
 
-        fetch("http://" + window.location.hostname + ":1337/" + this.state.updateRequest).then(data => data.json()).then(data => {
+        fetch("http://" + window.location.hostname + ":1337/" + this.state.updateRequest, {
+            credentials: "include"
+        }).then(data => data.json()).then(data => {
             this.setState({child: data})
         })
     }

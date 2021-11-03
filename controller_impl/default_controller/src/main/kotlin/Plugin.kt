@@ -37,18 +37,19 @@ class Plugin : IController {
     private var server: NettyApplicationEngine? = null
 
     private fun configureContainer(routing: Route, container: Container, key: String, name: String) {
-        container.onInitRequest = "$key/$name/container/init"
+        container.onInitRequest = "$key/$name/${container.name}/container/init".lowercase().replace(' ', '_')
         routing.get(container.onInitRequest) {
             val username = call.principal<UserIdPrincipal>()!!.name
             container.onInit(username)
+            call.respond(HttpStatusCode.OK, "")
         }
     }
 
     private fun configureOnOffState(routing: Route, child: Child, key: String, name: String) {
         if (child is gui.OnOffState) {
-            child.onOnStateRequest = "$key/$name/${child.name}/on".lowercase()
-            child.onOffStateRequest = "$key/$name/${child.name}/off".lowercase()
-            child.onGetStateRequest = "$key/$name/${child.name}/get".lowercase()
+            child.onOnStateRequest = "$key/$name/${child.name}/onoff/on".lowercase()
+            child.onOffStateRequest = "$key/$name/${child.name}/onoff/off".lowercase()
+            child.onGetStateRequest = "$key/$name/${child.name}/onoff/get".lowercase()
             routing.get(child.onOnStateRequest) {
                 child.onOnState(call.principal<UserIdPrincipal>()?.name!!)
                 call.respondText(
@@ -74,7 +75,7 @@ class Plugin : IController {
 
     private fun configureClickable(routing: Route, child: Child, key: String, name: String) {
         if (child is gui.Clickable) {
-            child.onClickRequest = "$key/$name/${child.name}".lowercase()
+            child.onClickRequest = "$key/$name/${child.name}/clickable".lowercase()
             routing.get(child.onClickRequest) {
                 child.onClick(call.principal<UserIdPrincipal>()?.name!!)
                 call.respondText("", status = HttpStatusCode.OK)
@@ -84,7 +85,7 @@ class Plugin : IController {
 
     private fun configureTextInput(routing: Route, child: Child, key: String, name: String) {
         if (child is gui.TextInput) {
-            child.updateRequest = "$key/$name/${child.name}".lowercase()
+            child.updateRequest = "$key/$name/${child.name}/textinput".lowercase()
             routing.post(child.updateRequest) {
                 val data = call.receive<TextInputData>()
                 child.update(call.principal<UserIdPrincipal>()?.name!!, data.text)
@@ -96,8 +97,8 @@ class Plugin : IController {
 
     private fun configureData(routing: Route, child: Child, key: String, name: String) {
         if (child is gui.Data) {
-            child.updateRequest = "$key/$name/${child.name}/request".lowercase()
-            child.updateSocket = "$key/$name/${child.name}/socket".lowercase()
+            child.updateRequest = "$key/$name/${child.name}/data/request".lowercase()
+            child.updateSocket = "$key/$name/${child.name}/data/socket".lowercase()
             routing.webSocket(child.updateSocket) {
                 val username = call.principal<UserIdPrincipal>()!!.name
                 val updateFunction: suspend (Child) -> Unit = { element ->
@@ -122,10 +123,8 @@ class Plugin : IController {
                 val username = call.principal<UserIdPrincipal>()!!.name
                 val json = Gui.getJsonDefault()
                 child.getState(username)?.let {
-                    suspend {
-                        val jsonString = json.encodeToString(it)
-                        call.respondText { jsonString }
-                    }
+                    val jsonString = json.encodeToString(it)
+                    call.respondText { jsonString }
                 }
             }
         }
@@ -174,7 +173,7 @@ class Plugin : IController {
                         value.pluginClassMap.forEach { (name, plugin) ->
                             val containers = plugin.getContainers()
                             containers.forEach {
-                                configureContainer(this, it, name, name)
+                                configureContainer(this, it, key, name)
                                 gui.add(it)
                                 it.list.forEach { child ->
                                     configureClickable(this, child, key, name)

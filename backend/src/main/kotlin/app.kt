@@ -6,7 +6,6 @@ import org.ktorm.database.Database
 import plugin.PluginSystem
 import plugin.implementations.controller.ControllerCreator
 import plugin.implementations.plugin.PluginCreator
-import sun.misc.Signal
 import java.util.*
 
 fun main() {
@@ -56,11 +55,7 @@ fun main() {
                 .send()
             client.toBlocking().disconnect()
         }
-
-        Signal.handle(Signal("INT")) {
-            shutdown()
-        }
-
+       
         val scanner = Scanner(System.`in`)
 
         while (true) {
