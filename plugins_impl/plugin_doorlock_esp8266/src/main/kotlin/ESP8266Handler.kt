@@ -19,6 +19,8 @@ class ESP8266Handler(
     private var mode: Mode = Mode.IDLE
     private var currentUid: ByteArray = ByteArray(0)
     private var currentData: ByteArray = ByteArray(0)
+
+    @Volatile
     private var dataCount = 0
     private var user: String? = null
     private var data: Data? = null
@@ -58,6 +60,7 @@ class ESP8266Handler(
     private fun errorCallback(publish: Mqtt3Publish) {
         if (publish.payload.isPresent) {
             logger.error { String(publish.payloadAsBytes) }
+            dataCount = 0
         }
     }
 
@@ -80,6 +83,7 @@ class ESP8266Handler(
         }
     }
 
+    @Synchronized
     private fun uidCallback(publish: Mqtt3Publish) {
         if (publish.payload.isPresent) {
             this.currentUid = Base64.getDecoder().decode(publish.payloadAsBytes)
@@ -88,6 +92,7 @@ class ESP8266Handler(
         handleRead()
     }
 
+    @Synchronized
     private fun dataCallback(publish: Mqtt3Publish) {
         if (publish.payload.isPresent) {
             this.currentData = Base64.getDecoder().decode(publish.payloadAsBytes)
@@ -174,6 +179,7 @@ class ESP8266Handler(
                 onClick = {
                     user = it
                     mode = Mode.CHECKING
+                    dataCount = 0
                     data?.update(it, Alert("alert-$id", "Changed mode to ${Mode.CHECKING}"))
                 }
             }
@@ -182,6 +188,7 @@ class ESP8266Handler(
                 onClick = {
                     user = it
                     mode = Mode.AUTHENTICATING
+                    dataCount = 0
                     data?.update(it, Alert("alert-$id", "Changed mode to ${Mode.AUTHENTICATING}"))
                 }
             }
@@ -190,6 +197,7 @@ class ESP8266Handler(
                 onClick = {
                     user = it
                     mode = Mode.IDLE
+                    dataCount = 0
                     data?.update(it, Alert("alert-$id", "Changed mode to ${Mode.IDLE}"))
                 }
             }

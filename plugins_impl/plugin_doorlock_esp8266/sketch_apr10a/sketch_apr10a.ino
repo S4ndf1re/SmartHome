@@ -193,8 +193,6 @@ void safeWrite(byte* data, int size) {
   if (status != MFRC522::STATUS_OK) {
     client->publish("doorlock/" CHIP_ID "/error", mfrc522.GetStatusCodeName(status));
     success = false;
-  } else {
-    client->publish("doorlock/" CHIP_ID "/error", "Written block 0");
   }
 
 
@@ -202,8 +200,6 @@ void safeWrite(byte* data, int size) {
   if (status != MFRC522::STATUS_OK) {
     client->publish("doorlock/" CHIP_ID "/error", mfrc522.GetStatusCodeName(status));
     success = false;
-  } else {
-    client->publish("doorlock/" CHIP_ID "/error", "Written block 1");
   }
 
 
@@ -211,8 +207,6 @@ void safeWrite(byte* data, int size) {
   if (status != MFRC522::STATUS_OK) {
     client->publish("doorlock/" CHIP_ID "/error", mfrc522.GetStatusCodeName(status));
     success = false;
-  } else {
-    client->publish("doorlock/" CHIP_ID "/error", "Written block 2");
   }
 
   // If success, everything worked.
