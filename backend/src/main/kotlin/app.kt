@@ -6,7 +6,6 @@ import org.ktorm.database.Database
 import plugin.PluginSystem
 import plugin.implementations.controller.ControllerCreator
 import plugin.implementations.plugin.PluginCreator
-import java.util.*
 
 fun main() {
     val logger = Logger("Backend System", LogLevel.DEBUG)
@@ -55,20 +54,8 @@ fun main() {
                 .send()
             client.toBlocking().disconnect()
         }
-       
-        val scanner = Scanner(System.`in`)
 
         while (true) {
-            print("> ")
-            val word = scanner.next().lowercase().trim()
-            if (word == "exit") {
-                break
-            } else if (word == "save") {
-                logger.save("log.json")
-            } else if (word == "show") {
-                logger.show()
-            }
-            println()
         }
 
     } catch (e: Exception) {

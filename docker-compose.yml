@@ -1,0 +1,42 @@
+version: "3"
+
+services:
+  frontend:
+    build: controller_impl/default_controller/frontend/
+    restart: always
+    ports:
+      - "8081:8080"
+    depends_on:
+      - "backend"
+  backend:
+    build: .
+    restart: always
+    ports:
+      - "1337:1337"
+    depends_on:
+      - "mysql"
+      - "mosquitto"
+    links:
+      - "mosquitto:mosquitto"
+      - "mysql:mysql"
+  mysql:
+    image: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: admin
+  mosquitto:
+    image: eclipse-mosquitto
+    restart: always
+    ports:
+      - "1883:1883"
+    volumes:
+      - mosquitto:/mosquitto
+
+volumes:
+  mysql: { }
+  mosquitto: { }
