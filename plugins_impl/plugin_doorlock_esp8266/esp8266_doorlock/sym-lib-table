@@ -1,0 +1,5 @@
+(sym_lib_table
+  (lib (name ESP8266)(type Legacy)(uri C:/Users/jankl/kicad/libraries/kicad-ESP8266/ESP8266.lib)(options "")(descr ""))
+  (lib (name LM2596S)(type Legacy)(uri C:/Users/jankl/Desktop/test/Converter_DCDC.lib)(options "")(descr ""))
+  (lib (name AMS1117)(type Legacy)(uri C:/Users/jankl/kicad/libraries/Kicad-AMS1117-master/AMS1117.lib)(options "")(descr ""))
+)

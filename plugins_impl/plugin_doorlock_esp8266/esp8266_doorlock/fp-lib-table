@@ -1,0 +1,8 @@
+(fp_lib_table
+  (lib (name ESP8266)(type KiCad)(uri C:/Users/jankl/Desktop/test/button.pretty)(options "")(descr ""))
+  (lib (name LM2596S)(type KiCad)(uri C:/Users/jankl/Desktop/test/LM2596S.pretty)(options "")(descr ""))
+  (lib (name Button)(type KiCad)(uri C:/Users/jankl/Desktop/test/button.pretty)(options "")(descr ""))
+  (lib (name Buzzer)(type KiCad)(uri C:/Users/jankl/Desktop/test/buzzer.pretty)(options "")(descr ""))
+  (lib (name dcjack)(type KiCad)(uri C:/Users/jankl/Desktop/test/dcjack.pretty)(options "")(descr ""))
+  (lib (name AMS1117)(type KiCad)(uri C:/Users/jankl/kicad/libraries/Kicad-AMS1117-master/AMS1117.pretty)(options "")(descr ""))
+)
