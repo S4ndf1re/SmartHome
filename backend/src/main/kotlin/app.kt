@@ -2,13 +2,16 @@ import com.github.s4ndf1re.LogLevel
 import com.github.s4ndf1re.Logger
 import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.datatypes.MqttQos
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.ktorm.database.Database
 import plugin.PluginSystem
 import plugin.implementations.controller.ControllerCreator
 import plugin.implementations.plugin.PluginCreator
 
-fun main() {
+suspend fun main() {
     val logger = Logger("Backend System", LogLevel.DEBUG)
+    delay(30000)
 
     val config = Config.loadConfig()
     val system = PluginSystem.loadFromDir("plugins", PluginCreator(), logger.createNode("Plugin loading"))
@@ -56,6 +59,7 @@ fun main() {
         }
 
         while (true) {
+            delay(5000)
         }
 
     } catch (e: Exception) {
