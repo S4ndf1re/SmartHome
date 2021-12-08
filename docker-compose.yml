@@ -5,7 +5,7 @@ services:
     build: controller_impl/default_controller/frontend/
     restart: always
     ports:
-      - "8081:8080"
+      - "1338:8080"
     depends_on:
       - "backend"
   backend:

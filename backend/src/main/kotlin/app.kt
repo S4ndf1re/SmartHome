@@ -1,17 +1,16 @@
+import com.github.s4ndf1re.DummyLogger
 import com.github.s4ndf1re.LogLevel
-import com.github.s4ndf1re.Logger
 import com.hivemq.client.mqtt.MqttClient
 import com.hivemq.client.mqtt.datatypes.MqttQos
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
 import org.ktorm.database.Database
 import plugin.PluginSystem
 import plugin.implementations.controller.ControllerCreator
 import plugin.implementations.plugin.PluginCreator
 
 suspend fun main() {
-    val logger = Logger("Backend System", LogLevel.DEBUG)
-    delay(30000)
+    val logger = DummyLogger("Backend System", LogLevel.DEBUG)
+    //delay(30000)
 
     val config = Config.loadConfig()
     val system = PluginSystem.loadFromDir("plugins", PluginCreator(), logger.createNode("Plugin loading"))
@@ -33,7 +32,7 @@ suspend fun main() {
             .simpleAuth().username(config.mqtt.username).password(config.mqtt.password.toByteArray()).applySimpleAuth()
             .serverHost(config.mqtt.hostname).serverPort(config.mqtt.port)
             .build()
-        client.toBlocking().connect()
+        client.toBlocking().connectWith().cleanSession(false).send()
 
         client.toBlocking().publishWith().topic("backend/status/active").payload("true".toByteArray()).retain(true)
             .send()
@@ -48,15 +47,6 @@ suspend fun main() {
 
         system.start(client, database, logger.createNode("Plugins"))
         controllers.start(client, database, logger.createNode("Controllers"))
-
-        val shutdown = {
-            system.stop()
-            controllers.stop()
-            client.toBlocking().publishWith().topic("backend/status/active").payload("false".toByteArray())
-                .retain(true)
-                .send()
-            client.toBlocking().disconnect()
-        }
 
         while (true) {
             delay(5000)

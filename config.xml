@@ -2,13 +2,13 @@
 <Config>
     <MqttConfig>
         <identifier>mqtt_backend</identifier>
-        <hostname>mosquitto</hostname>
+        <hostname>192.168.100.10</hostname>
         <port>1883</port>
         <username>mqtt_backend</username>
         <password>1234</password>
     </MqttConfig>
     <SQLConfig>
-        <hostname>mysql</hostname>
+        <hostname>192.168.100.10</hostname>
         <port>3306</port>
         <database>backend</database>
         <username>root</username>

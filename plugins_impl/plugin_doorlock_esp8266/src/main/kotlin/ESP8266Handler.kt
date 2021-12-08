@@ -5,6 +5,8 @@ import com.hivemq.client.mqtt.mqtt3.message.publish.Mqtt3Publish
 import gui.Alert
 import gui.Container
 import gui.Data
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import org.ktorm.database.Database
 import org.ktorm.dsl.*
 import java.util.*
@@ -20,8 +22,6 @@ class ESP8266Handler(
     private var currentUid: ByteArray = ByteArray(0)
     private var currentData: ByteArray = ByteArray(0)
 
-    @Volatile
-    private var dataCount = 0
     private var user: String? = null
     private var data: Data? = null
 
@@ -32,9 +32,7 @@ class ESP8266Handler(
             .callback { errorCallback(it) }.send()
         mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/write/ok").qos(MqttQos.EXACTLY_ONCE)
             .callback { writeOkCallback(it) }.send()
-        mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/read/uid").qos(MqttQos.EXACTLY_ONCE)
-            .callback { uidCallback(it) }.send()
-        mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/read/data").qos(MqttQos.EXACTLY_ONCE)
+        mqtt.toAsync().subscribeWith().topicFilter("doorlock/${id}/read").qos(MqttQos.EXACTLY_ONCE)
             .callback { dataCallback(it) }.send()
     }
 
@@ -53,21 +51,20 @@ class ESP8266Handler(
             } else {
                 this.status = Status.INACTIVE
             }
-            this.logger.info { "Changed $id to $status" }
+            println("Changed $id to $status")
         }
     }
 
     private fun errorCallback(publish: Mqtt3Publish) {
         if (publish.payload.isPresent) {
-            logger.error { String(publish.payloadAsBytes) }
-            dataCount = 0
+            println(String(publish.payloadAsBytes))
         }
     }
 
     private fun writeOkCallback(publish: Mqtt3Publish) {
         if (publish.payload.isPresent) {
             if (publish.payloadAsBytes.contentEquals("true".toByteArray())) {
-                logger.info { "Data for ChipID $id was written successfully. Update DB" }
+                println("Data for ChipID $id was written successfully. Update DB")
                 database.update(Mifare1k) {
                     set(it.data, currentData)
                     where {
@@ -75,41 +72,34 @@ class ESP8266Handler(
                     }
                 }
 
-                if (this.mode == Mode.CHECKING) {
-                    println("Opening door for ${this.id}")
-                    this.performDoorOpen()
-                }
+                //if (this.mode == Mode.CHECKING) {
+                //    println("Opening door for ${this.id}")
+                //    this.performDoorOpen()
+                //}
             }
         }
-    }
-
-    @Synchronized
-    private fun uidCallback(publish: Mqtt3Publish) {
-        if (publish.payload.isPresent) {
-            this.currentUid = Base64.getDecoder().decode(publish.payloadAsBytes)
-            dataCount++
-        }
-        handleRead()
     }
 
     @Synchronized
     private fun dataCallback(publish: Mqtt3Publish) {
         if (publish.payload.isPresent) {
-            this.currentData = Base64.getDecoder().decode(publish.payloadAsBytes)
-            this.dataCount++
+            println("Received payload: ${publish.payload}")
+            val tempData = publish.payloadAsBytes
+            val json = Json
+            val tempPayload = json.decodeFromString<Payload>(String(tempData))
+            this.currentData = Base64.getDecoder().decode(tempPayload.data.toByteArray())
+            this.currentUid = Base64.getDecoder().decode(tempPayload.uid.toByteArray())
+            handleRead()
         }
-        handleRead()
     }
 
 
     private fun handleRead() {
-        if (this.dataCount % 2 == 0 && this.dataCount > 0 && this.status == Status.ACTIVE) {
-            this.dataCount = 0
-            when (this.mode) {
-                Mode.IDLE -> return
-                Mode.AUTHENTICATING -> this.authenticate()
-                Mode.CHECKING -> this.check()
-            }
+        println("Handle read with Mode: $mode")
+        when (this.mode) {
+            Mode.IDLE -> return
+            Mode.AUTHENTICATING -> this.authenticate()
+            Mode.CHECKING -> this.check()
         }
     }
 
@@ -141,7 +131,6 @@ class ESP8266Handler(
             return
         }
 
-        // Determine if chip already exists. If no, insert chip into db
         if (!this.doesCurrentChipExist()) {
             this.insertCurrentChip()
         }
@@ -156,15 +145,20 @@ class ESP8266Handler(
     }
 
     private fun check() {
+        println("Trying to fetch from db")
         val validUidContent = database.from(Mifare1k).select().where {
             Mifare1k.uid eq this.currentUid
-        }.map { row ->
-            row[Mifare1k.data].contentEquals(this.currentData)
+        }.map {
+            true
+            //row[Mifare1k.data].contentEquals(this.currentData)
         }
         if (validUidContent.any { it }) {
+            println("Found valid db entry. Authetication now")
             this.authenticate()
+            println("Opening door for ${this.id}")
+            this.performDoorOpen()
         } else {
-            logger.error { "No existing uid found in DB or Content is different" }
+            println("No existing uid found in DB or Content is different")
         }
     }
 
@@ -179,7 +173,6 @@ class ESP8266Handler(
                 onClick = {
                     user = it
                     mode = Mode.CHECKING
-                    dataCount = 0
                     data?.update(it, Alert("alert-$id", "Changed mode to ${Mode.CHECKING}"))
                 }
             }
@@ -188,7 +181,6 @@ class ESP8266Handler(
                 onClick = {
                     user = it
                     mode = Mode.AUTHENTICATING
-                    dataCount = 0
                     data?.update(it, Alert("alert-$id", "Changed mode to ${Mode.AUTHENTICATING}"))
                 }
             }
@@ -197,7 +189,6 @@ class ESP8266Handler(
                 onClick = {
                     user = it
                     mode = Mode.IDLE
-                    dataCount = 0
                     data?.update(it, Alert("alert-$id", "Changed mode to ${Mode.IDLE}"))
                 }
             }

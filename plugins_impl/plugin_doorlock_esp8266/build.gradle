@@ -16,6 +16,7 @@ dependencies {
     testImplementation 'org.jetbrains.kotlin:kotlin-test'
     testImplementation 'org.jetbrains.kotlin:kotlin-test-junit'
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-core:1.1.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.3.0'
     implementation "io.github.pdvrieze.xmlutil:core:0.82.0"
     implementation project(":lib")
     implementation "io.github.pdvrieze.xmlutil:serialization-jvm:0.82.0"

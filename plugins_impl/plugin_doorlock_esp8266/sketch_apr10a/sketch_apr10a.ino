@@ -59,7 +59,7 @@ void setup() {
   char port[6] = "";
   WiFiManagerParameter mqtt_server("server", "mqtt server", config.server, 40);
   WiFiManagerParameter mqtt_password("password", "mqtt password", config.password, 40);
-  WiFiManagerParameter mqtt_user("password", "mqtt user", config.password, 40);
+  WiFiManagerParameter mqtt_user("user", "mqtt user", config.password, 40);
   WiFiManagerParameter mqtt_port("port", "mqtt port", port, 6);
   manager.setSaveConfigCallback(onSaveCallback);
   manager.setConnectTimeout(60);
@@ -68,6 +68,7 @@ void setup() {
   manager.addParameter(&mqtt_user);
   manager.addParameter(&mqtt_password);
   auto result = manager.autoConnect("ConfigAP");
+  //auto result = manager.startConfigPortal();
 
   config.port = atoi(mqtt_port.getValue());
   strcpy(config.server, mqtt_server.getValue());
@@ -90,6 +91,9 @@ void setup() {
   psk = WiFi.psk();
   ssid = WiFi.SSID();
   WiFi.disconnect();
+  WiFi.setSleepMode(WIFI_NONE_SLEEP);
+  WiFi.setAutoReconnect(true);
+  WiFi.persistent(true);
 
 
 
@@ -99,15 +103,18 @@ void setup() {
     config.server,
     config.user,
     config.password,
-    CHIP_ID,
+    "chipread:" CHIP_ID,
     config.port
   );
+  client->setKeepAlive(15);
 
   client->enableDebuggingMessages();
   willTopic = "doorlock/";
   willTopic += CHIP_ID;
   willTopic += "/status";
   client->enableLastWillMessage("doorlock/" CHIP_ID "/status", "false", true);
+  client->setMqttReconnectionAttemptDelay(5000);
+  client->setWifiReconnectionAttemptDelay(60000);
 
 
   SPI.begin();
@@ -299,23 +306,19 @@ void rfidLoop() {
   Base64.encode((char*)base64_uid, (char*)mfrc522.uid.uidByte, mfrc522.uid.size);
   base64_uid[base64_size] = '\0';
 
-//  if (last_uid == String((char*) base64_uid)) {
-//    // Halt PICC
-//    mfrc522.PICC_HaltA();
-//    // Stop encryption on PCD
-//    mfrc522.PCD_StopCrypto1();
-//    return;
-//  }
-
-  client->publish("doorlock/" CHIP_ID "/read/uid", String((char*) base64_uid));
-
   byte buffer[MAX_BYTES];
-  rfidRead(buffer, MAX_BYTES);
+  rfidRead(buffer, MAX_BYTES); 
   base64_size = Base64.encodedLength(MAX_BYTES);
   byte base64_data[base64_size + 1];
   Base64.encode((char*)base64_data, (char*) buffer, MAX_BYTES);
   base64_data[base64_size] = '\0';
-  client->publish("doorlock/" CHIP_ID "/read/data", String((char*) base64_data));
+
+  String bufferString = "{ \"uid\": \"";
+  bufferString += String((char *) base64_uid);
+  bufferString += String("\", \"data\": \"");
+  bufferString += String((char *)base64_data);
+  bufferString += "\" }";
+  client->publish("doorlock/" CHIP_ID "/read", bufferString);
 
   last_uid = String((char*) base64_uid);
   // Halt PICC
@@ -328,7 +331,7 @@ void loop() {
 
   client->loop();
   rfidLoop();
-  delay(100);
+  delay(200);
 
 }
 

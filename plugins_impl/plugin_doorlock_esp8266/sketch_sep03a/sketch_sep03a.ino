@@ -79,6 +79,9 @@ void setup(void) {
   psk = WiFi.psk();
   ssid = WiFi.SSID();
   WiFi.disconnect();
+  WiFi.setSleepMode(WIFI_NONE_SLEEP);
+  WiFi.setAutoReconnect(true);
+  WiFi.persistent(true);
 
 
 
@@ -91,8 +94,11 @@ void setup(void) {
     CHIP_ID,
     config.port
   );
+  client->setKeepAlive(15);
 
   client->enableLastWillMessage("doorlock/" CHIP_ID "/opener/status", "false", true);
+  client->setMqttReconnectionAttemptDelay(5000);
+  client->setWifiReconnectionAttemptDelay(60000);
 
 }
 
