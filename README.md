@@ -1,6 +1,14 @@
 # SmartHome
 
-TODO
+During Covid-19 lockdown, I started a hobby project to experiment with plugin support for MQTT Services.
+This repository is the result.
+
+Primarily, this project connected MQTT connections and web UI components with plugins written in Java / Kotlin.
+
+To tests the projects validity, an automatic doorlock opener was developed. This doorlock plugin registered into the plugin systems,
+exposed its functionality over Websockets and normal HTTP Endpoints, and communicated over MQTT with two ESP8266, one responsible for reading chips, one for actuating the doorlock mechanism.
+
+For roughly one year, this tool in actual use, until [Smart Home V2](https://github.com/S4ndf1re/SmartHomeV2) was developed as its replacement, due to repeating issues with the Eclipse MQTT Client Library.
 
 # Dependencies
 
